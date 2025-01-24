@@ -17,7 +17,7 @@ export function BookingForm({ onSubmit, onCancel, isLoading, error, success }) {
       // Close form after animation
       const closeTimer = setTimeout(() => {
         onCancel();
-      }, 4000); // 2s delay + 0.5s animation
+      }, 4000); // 4s delay + 0.5s animation
 
       return () => {
         clearTimeout(fadeTimer);
