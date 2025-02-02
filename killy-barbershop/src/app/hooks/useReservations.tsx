@@ -1,21 +1,7 @@
 import { useState, useEffect } from 'react';
 import supabase from '../utils/supabaseClient';
-
-interface Slot {
-  Title: string;
-  Start: Date;
-  End: Date;
-  Resource: string;
-  Status?: string;
-  UserId?: string;
-  UserName?: string;
-  UserPhone?: string;
-}
-
-interface FormData {
-  Name: string;
-  Phone: string;
-}
+import { sendConfirmationSMS } from '../utils/twilioService';
+import { Slot, FormData } from '../types/booking';
 
 const generateAvailableSlots = (startDate: Date, endDate: Date): Slot[] => {
   const slots: Slot[] = [];
@@ -45,11 +31,6 @@ const generateAvailableSlots = (startDate: Date, endDate: Date): Slot[] => {
     }
   }
   return slots;
-};
-
-const sendConfirmationSMS = async (phone: string) => {
-  // Implement your SMS logic here
-  console.log('SMS would be sent to:', phone);
 };
 
 /* const validatePortuguesePhone = async (phone: string) => {
@@ -126,13 +107,14 @@ export function useReservations() {
 
   const createReservation = async (formData: FormData, selectedSlot: Slot) => {
     try {
-      // await validatePortuguesePhone(formData.Phone);
+      // Format phone number to add Portuguese country code
+      const formattedPhone = formData.Phone.startsWith('+') ? formData.Phone : `+351${formData.Phone.replace(/^0+/, '')}`;
 
-      // Find or create user
+      // Find or create user with formatted phone
       const { data: existingUser, error: userQueryError } = await supabase
         .from('Users')
         .select('Id')
-        .eq('Phone', formData.Phone)
+        .eq('Phone', formattedPhone)  // Use formatted phone
         .single();
 
       let userId: string;
@@ -142,7 +124,7 @@ export function useReservations() {
           .from('Users')
           .insert([{ 
             Name: formData.Name,
-            Phone: formData.Phone
+            Phone: formattedPhone  // Use formatted phone
           }])
           .select('Id')
           .single();
@@ -177,7 +159,17 @@ export function useReservations() {
         throw reservationError;
       }
 
-      await sendConfirmationSMS(formData.Phone);
+      const formattedDate = selectedSlot.Start.toLocaleString('pt-PT', {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      // Send SMS with formatted phone number
+      await sendConfirmationSMS(formattedPhone, formData.Name, formattedDate);
+
       await fetchReservations();
       return { success: true };
     } catch (err: any) {

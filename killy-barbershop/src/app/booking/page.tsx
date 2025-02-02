@@ -7,24 +7,9 @@ import { pt } from 'date-fns/locale';
 import { useReservations } from '../hooks/useReservations';
 import { BookingForm } from '../components/booking-form';
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import { Slot, FormData } from '../types/booking';
 
 const locales = { 'pt': pt };
-
-type Slot = {
-    Start: Date;
-    End: Date;
-    Title: string;
-    Resource: string;
-    UserName?: string;
-    UserPhone?: string;
-    Status?: string;
-  };
-  
-  type FormData = {
-    Name: string;
-    Phone: string;
-  };
-
 
 const localizer = dateFnsLocalizer({
   format,
