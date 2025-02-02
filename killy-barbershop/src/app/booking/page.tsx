@@ -116,8 +116,7 @@ const BookingPage = () => {
               today: "Hoje",
               week: "Semana",
               noEventsInRange: "Não há horários disponíveis",
-            }}
-          />
+            }}/>
         </div>
 
         {showBookingDetails && selectedSlot && (
@@ -134,8 +133,7 @@ const BookingPage = () => {
                 <div className="flex gap-4 mt-6">
                   <button
                     onClick={() => setShowBookingDetails(false)}
-                    className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-                  >
+                    className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
                     Fechar
                   </button>
                 </div>

@@ -33,7 +33,7 @@ const generateAvailableSlots = (startDate: Date, endDate: Date): Slot[] => {
   return slots;
 };
 
-/* const validatePortuguesePhone = async (phone: string) => {
+  const validatePortuguesePhone = async (phone: string) => {
   const API_KEY = '7217ae233c3c14c3e674f46c68b6dd84';
   const url = `http://apilayer.net/api/validate?access_key=${API_KEY}&number=${phone}&country_code=PT&format=1`;
 
@@ -53,7 +53,7 @@ const generateAvailableSlots = (startDate: Date, endDate: Date): Slot[] => {
   } catch (err) {
     throw new Error('Erro ao validar o número de telefone. Por favor, tente novamente.');
   }
-}; */
+}; 
 
 export function useReservations() {
   const [events, setEvents] = useState<Slot[]>([]);

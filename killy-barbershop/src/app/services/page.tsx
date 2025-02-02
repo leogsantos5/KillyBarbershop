@@ -51,8 +51,7 @@ const Services: FC = () => {
           {services.map((service) => (
             <div
               key={service.name}
-              className="flex flex-col border-2 rounded-lg p-8 hover:border-blue-600 hover:shadow-xl transition-all duration-300 group"
-            >
+              className="flex flex-col border-2 rounded-lg p-8 hover:border-blue-600 hover:shadow-xl transition-all duration-300 group">
               <div className="flex items-center justify-between">
                 <h3 className="text-2xl font-bold text-gray-900 group-hover:text-blue-700 transition-colors">
                   {service.name}
