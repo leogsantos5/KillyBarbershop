@@ -2,6 +2,7 @@
 
 import { FC } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const Home: FC = () => {
   return (
@@ -9,10 +10,13 @@ const Home: FC = () => {
       {/* Hero Section */}
       <div className="relative h-[600px]">
         <div className="absolute inset-0">
-          <img
+          <Image
             className="w-full h-full object-cover"
             src="/images/OutsideEntrance.jpg"
             alt="Killy Ross & Xandy Gavira Barbershop"
+            width={1920}
+            height={1080}
+            priority
           />
           <div className="absolute inset-0 bg-black/60 mix-blend-multiply" />
         </div>
@@ -45,11 +49,13 @@ const Home: FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Image 1 */}
-            <div className="relative group overflow-hidden rounded-lg shadow-xl">
-              <img
+            <div className="relative group overflow-hidden rounded-lg shadow-xl h-64">
+              <Image
+                className="w-full h-full object-cover"
                 src="/images/OutsideEntrance.jpg"
-                alt="Barber Shop View"
-                className="w-full h-[400px] object-cover transform group-hover:scale-110 transition-transform duration-500"
+                alt="Interior da Barbearia"
+                width={400}
+                height={300}
               />
               <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <span className="text-white text-xl font-bold">Entrada Moderna</span>
@@ -57,11 +63,13 @@ const Home: FC = () => {
             </div>
 
             {/* Image 2 */}
-            <div className="relative group overflow-hidden rounded-lg shadow-xl">
-              <img
-                src="/images/KillySitting.jpg"
-                alt="Barber Shop Interior"
-                className="w-full h-[400px] object-cover transform group-hover:scale-110 transition-transform duration-500"
+            <div className="relative group overflow-hidden rounded-lg shadow-xl h-64">
+              <Image
+                className="w-full h-full object-cover"
+                src="/images/KillyBackBrand.jpg"
+                alt="Cadeiras da Barbearia"
+                width={400}
+                height={300}
               />
               <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <span className="text-white text-xl font-bold">Equipamento de ponta</span>
@@ -69,11 +77,13 @@ const Home: FC = () => {
             </div>
 
             {/* Image 3 */}
-            <div className="relative group overflow-hidden rounded-lg shadow-xl">
-              <img
-                src="/images/KillyBackBrand.jpg"
-                alt="Barber Shop Entrance"
-                className="w-full h-[400px] object-cover transform group-hover:scale-110 transition-transform duration-500"
+            <div className="relative group overflow-hidden rounded-lg shadow-xl h-64">
+              <Image
+                className="w-full h-full object-cover"
+                src="/images/KillySitting.jpg"
+                alt="Ferramentas de Barbeiro"
+                width={400}
+                height={300}
               />
               <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <span className="text-white text-xl font-bold">Ambiente Profissional</span>

@@ -1,16 +1,14 @@
 'use client';
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect} from 'react';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { useReservations } from '../hooks/useReservations';
 import { BookingForm } from '../components/booking-form';
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { Slot, FormData } from '../types/booking';
+import { BookingSlotVM, FormData } from '../types/booking';
 
 const locales = { 'pt': pt };
-
 const localizer = dateFnsLocalizer({
   format,
   parse,
@@ -22,7 +20,7 @@ const localizer = dateFnsLocalizer({
 const BookingPage = () => {
   const [initialLoading, setInitialLoading] = useState(true);
   const [date, setDate] = useState(new Date());
-  const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<BookingSlotVM | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [showBookingDetails, setShowBookingDetails] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -38,10 +36,10 @@ const BookingPage = () => {
       setInitialLoading(false);
     };
     loadReservations();
-  }, []);
+  }, [fetchReservations]);
 
-  const handleSelectEvent = (event: Slot) => {
-    if (event.Resource === 'booked') {
+  const handleSelectEvent = (event: BookingSlotVM) => {
+    if (event.Status === 'A confirmar' || event.Status === 'Confirmado') {
       setSelectedSlot(event);
       setShowBookingDetails(true);
     } else {
@@ -60,12 +58,12 @@ const BookingPage = () => {
     if (result.success) {
       setFormSuccess(true);
     } else {
-      setFormError(result.error);
+      setFormError(result.error || 'Erro ao criar reserva');
     }
   };
 
-  const eventStyleGetter = (event: Slot) => {
-    const isBooked = event.Resource === 'booked';
+  const eventStyleGetter = (event: BookingSlotVM) => {
+    const isBooked = event.Status === 'A confirmar' || event.Status === 'Confirmado';
     return {
       style: {
         backgroundColor: isBooked ? '#EF4444' : '#10B981',
@@ -99,7 +97,6 @@ const BookingPage = () => {
             events={events}
             startAccessor="Start"
             endAccessor="End"
-            titleAccessor="Title"
             style={{ height: 600 }}
             eventPropGetter={eventStyleGetter}
             onSelectEvent={handleSelectEvent}
