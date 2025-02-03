@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import supabase from '../utils/supabaseClient';
 import { DbBookedSlot, BookingSlotVM, FormData, SupabaseError } from '../types/booking';
-import { validatePortuguesePhone } from '../utils/numVerifyService';
+// import { validatePortuguesePhone } from '../utils/numVerifyService';
 import { sendConfirmationSMS } from '../utils/twilioService';
 
 const generateAvailableSlots = (startDate: Date, endDate: Date): BookingSlotVM[] => {
@@ -9,7 +9,6 @@ const generateAvailableSlots = (startDate: Date, endDate: Date): BookingSlotVM[]
   const startHour = 9;
   const endHour = 19;
 
-  // Start from tomorrow
   const tomorrow = new Date(startDate);
   tomorrow.setDate(tomorrow.getDate() + 1);
   tomorrow.setHours(0, 0, 0, 0);
@@ -84,8 +83,8 @@ export function useReservations() {
 
   const createReservation = async (formData: FormData, selectedSlot: BookingSlotVM) => {
     try {
-      const isValidPhone = await validatePortuguesePhone(formData.Phone);
-      if (!isValidPhone)  throw new Error('Número de telefone inválido');
+      /* const isValidPhone = await validatePortuguesePhone(formData.Phone);
+      if (!isValidPhone)  throw new Error('Número de telefone inválido'); */
       
       const formattedPhone = formData.Phone.startsWith('+') ? formData.Phone : `+351${formData.Phone.replace(/^0+/, '')}`;
 
@@ -136,7 +135,8 @@ export function useReservations() {
         }
         throw reservationError;
       }
-
+      
+      debugger;
       const formattedDate = selectedSlot.Start.toLocaleString('pt-PT', {weekday: 'long', month: 'long', day: 'numeric',
                                                                         hour: '2-digit', minute: '2-digit'}); 
       await sendConfirmationSMS(formattedPhone, formData.Name, formattedDate);
