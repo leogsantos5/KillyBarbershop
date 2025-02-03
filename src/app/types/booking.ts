@@ -25,3 +25,12 @@ export interface SupabaseError {
   message: string;
   status: number;
 }
+
+export interface NumVerifyResponse {
+  valid: boolean;
+  number: string;
+  local_format: string;
+  international_format: string;
+  country_prefix: string;
+  carrier: string;
+}
