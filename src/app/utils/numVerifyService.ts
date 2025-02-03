@@ -1,7 +1,7 @@
 import { NumVerifyResponse } from "../types/booking";
 
 const API_KEY = process.env.NEXT_PUBLIC_NUMVERIFY_API_KEY;
-const API_URL = 'http://apilayer.net/api/validate';
+const API_URL = 'https://apilayer.net/api/validate';
 
 export async function validatePortuguesePhone(phone: string): Promise<boolean> {
   try { 
