@@ -2,36 +2,26 @@ import { useState, useEffect, useCallback } from 'react';
 import supabase from '../utils/supabaseClient';
 import { DbBookedSlot, BookingSlotVM, FormData, SupabaseError } from '../types/booking';
 // import { validatePortuguesePhone } from '../utils/numVerifyService';
-import { sendConfirmationSMS } from '../utils/twilioService';
+// import { sendConfirmationSMS } from '../utils/twilioService';
+import { startOfDay, getDay, setHours, addDays, setMinutes, addMinutes } from 'date-fns'; // add format
 
 const generateAvailableSlots = (startDate: Date, endDate: Date): BookingSlotVM[] => {
-  const slots: BookingSlotVM[] = [];
-  const startHour = 9;
-  const endHour = 19;
+  const slotsVMs: BookingSlotVM[] = [];
+  let currentDate = startOfDay(startDate);
 
-  const tomorrow = new Date(startDate);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  tomorrow.setHours(0, 0, 0, 0);
-
-  for (let date = new Date(tomorrow); date <= endDate; date.setDate(date.getDate() + 1)) {
-    if (date.getDay() === 0) continue; // Skip Sundays
-
-    for (let hour = startHour; hour < endHour; hour++) {
-      for (const minute of [0, 30]) {
-        const slotStart = new Date(date);
-        slotStart.setHours(hour, minute, 0, 0);
-
-        slots.push({
-          Start: slotStart,
-          End: new Date(slotStart.getTime() + 30 * 60000),
-          Status: 'Disponível',
-          UserName: '',
-          UserPhone: ''
-        });
+  while (currentDate <= endDate) {
+    if (getDay(currentDate) !== 0) { // Skip Sundays
+      for (let hour = 9; hour < 19; hour++) {
+        for (let minutes = 0; minutes < 60; minutes += 30) {
+          const slotStart = setMinutes(setHours(currentDate, hour), minutes);
+          slotsVMs.push({Start: slotStart, End: addMinutes(slotStart, 30),
+                         Status: 'Disponível', UserName: '', UserPhone: '' });
+        }
       }
     }
+    currentDate = addDays(currentDate, 1);
   }
-  return slots;
+  return slotsVMs;
 };
 
 export function useReservations() {
@@ -46,7 +36,7 @@ export function useReservations() {
     try {
       const { data: bookedSlots, error } = await supabase
         .from('Reservations')
-        .select(`StartTime, EndTime, Status, UserId, Users (Name, Phone)`) as { 
+        .select(`StartTime, EndTime, Status, Users (Id, Name, Phone)`) as { 
           data: DbBookedSlot[] | null, 
           error: SupabaseError | null 
         };
@@ -56,7 +46,6 @@ export function useReservations() {
       const currentDate = new Date();
       const endDate = new Date(currentDate.getTime() + 28 * 24 * 60 * 60 * 1000);
       const allSlots = generateAvailableSlots(currentDate, endDate);
-
       bookedSlots?.forEach((booking: DbBookedSlot) => {
         const bookingStart = new Date(booking.StartTime).getTime();
         const slotIndex = allSlots.findIndex(slot => slot.Start.getTime() === bookingStart);
@@ -66,8 +55,8 @@ export function useReservations() {
             Start: new Date(booking.StartTime),
             End: new Date(booking.EndTime),
             Status: booking.Status,
-            UserName: booking.Users[0]?.Name,
-            UserPhone: booking.Users[0]?.Phone
+            UserName: booking.Users.Name || '',
+            UserPhone: booking.Users.Phone || ''
           };
         }
       });
@@ -83,15 +72,22 @@ export function useReservations() {
 
   const createReservation = async (formData: FormData, selectedSlot: BookingSlotVM) => {
     try {
+      // First validate the phone
       /* const isValidPhone = await validatePortuguesePhone(formData.Phone);
-      if (!isValidPhone)  throw new Error('Número de telefone inválido'); */
-      
-      const formattedPhone = formData.Phone.startsWith('+') ? formData.Phone : `+351${formData.Phone.replace(/^0+/, '')}`;
+      if (!isValidPhone) {
+        throw new Error('Número de telefone inválido');
+      } */
+     
+      // Format phone number to add Portuguese country code if not present
+      const formattedPhone = formData.Phone.startsWith('+') 
+        ? formData.Phone 
+        : `+351${formData.Phone.replace(/^0+/, '')}`;
+
 
       const { data: existingUser } = await supabase
         .from('Users')
         .select('Id')
-        .eq('Phone', formattedPhone)  // Use formatted phone
+        .eq('Phone', formattedPhone)
         .single();
 
       let userId: string;
@@ -135,17 +131,15 @@ export function useReservations() {
         }
         throw reservationError;
       }
-      
-      debugger;
-      const formattedDate = selectedSlot.Start.toLocaleString('pt-PT', {weekday: 'long', month: 'long', day: 'numeric',
-                                                                        hour: '2-digit', minute: '2-digit'}); 
-      await sendConfirmationSMS(formattedPhone, formData.Name, formattedDate);
 
+      // await sendConfirmationSMS(formattedPhone, formData.Name, format(selectedSlot.Start, "dd/MM/yyyy 'às' HH:mm"));
       await fetchReservations();
       return { success: true };
-    } catch (err: unknown) {
-      console.error('Error in createReservation:', err);
-      return { success: false, error: err instanceof Error ? err.message : 'An unknown error occurred' };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'An unknown error occurred' 
+      };
     }
   };
 

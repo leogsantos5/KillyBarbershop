@@ -10,9 +10,8 @@ const client = twilio(accountSid, authToken);
 export async function POST(request: Request) {
   try {
     const { phone, name, date } = await request.json();
-    debugger;
     const message = await client.messages.create({
-      body: `Olá ${name}, a sua marcação para ${date} foi registada. Aguarde confirmação dos barbeiros.`,
+      body: `Olá ${name}, a sua marcação para ${date} foi registada.`,
       from: twilioPhone,
       to: phone
     });

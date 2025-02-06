@@ -1,11 +1,5 @@
 import { FC } from 'react';
-
-interface Service {
-  name: string;
-  price: number;
-  duration: string;
-  description: string;
-}
+import { Service } from '../types/booking';
 
 const services: Service[] = [
   {
@@ -36,7 +30,7 @@ const services: Service[] = [
 
 const Services: FC = () => {
   return (
-    <div className="bg-white py-24 sm:py-32">
+    <div className="bg-white py-12 sm:py-16">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-5xl font-bold tracking-tight text-gray-900 mb-4">
