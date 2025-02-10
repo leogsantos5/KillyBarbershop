@@ -70,8 +70,8 @@ const BookingPage = () => {
       {step === 1 && (
         <div className="bg-white rounded-lg shadow p-4">
           <h2 className="text-xl font-bold mb-4">Escolha o dia</h2>
-          <div className="space-y-2">
-            {[...Array(7)].map((_, i) => {
+          <div className="space-y-2 max-h-[60vh] overflow-y-auto pb-4">
+            {[...Array(28)].map((_, i) => {
               const date = addDays(new Date(), i + 1);
               if (getDay(date) === 0) return null;
               
@@ -168,7 +168,7 @@ const BookingPage = () => {
 
   if (initialLoading) {
     return (
-      <div className="text-center mb-4">
+      <div className="text-center mb-4 my-12">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-red-600 border-t-transparent"></div>
       </div>
     );

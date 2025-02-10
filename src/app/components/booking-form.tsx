@@ -82,13 +82,19 @@ export function BookingForm({
 
             <div>
               <label className="block text-sm font-medium text-gray-700">Telemóvel</label>
-              <input
-                type="tel"
-                required
-                pattern="[0-9]{9}"
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
-                value={formData.Phone}
-                onChange={(e) => setFormData((prev) => ({ ...prev, Phone: e.target.value }))}/>
+              <div className="relative mt-1">
+                <span className="absolute inset-y-0 left-3 flex items-center text-gray-500 pointer-events-none mr-2">
+                  +351
+                </span>
+                <input
+                  type="tel"
+                  required
+                  pattern="[0-9]{9}"
+                  className="pl-14 block w-full rounded-md border border-gray-300 px-3 py-2"
+                  value={formData.Phone}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, Phone: e.target.value }))}
+                />
+              </div>
             </div>
 
             <div className="flex gap-4 mt-6">

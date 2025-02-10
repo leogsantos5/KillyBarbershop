@@ -40,7 +40,7 @@ const Home: FC = () => {
       </div>
 
       {/* New Gallery Section */}
-      <div className="py-16 bg-white">
+      <div className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl font-bold text-center mb-12">
             Bem-vindo à Nossa Barbearia
@@ -115,13 +115,13 @@ const Home: FC = () => {
       </div>
 
       {/* Features Section */}
-      <div className="py-24 bg-white">
+      <div className="py-8 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
-            {features.map((feature, index) => (
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+            {qualities.map((feature, index) => (
               <div key={feature.name} className="text-center group hover:scale-105 transition-transform duration-300">
                 <div
-                  className={`flex items-center justify-center h-16 w-16 rounded-full mx-auto transition-colors ${
+                  className={`flex items-center justify-center h-14 w-14 rounded-full mx-auto transition-colors ${
                     index % 3 === 0
                       ? 'bg-red-600 group-hover:bg-red-700'
                       : index % 3 === 1
@@ -131,7 +131,7 @@ const Home: FC = () => {
                 >
                   <span className="text-2xl">{feature.icon}</span>
                 </div>
-                <h3 className="mt-6 text-xl font-bold text-gray-900">{feature.name}</h3>
+                <h3 className="mt-4 text-xl font-bold text-gray-900">{feature.name}</h3>
                 <p className="mt-2 text-base text-gray-600">{feature.description}</p>
               </div>
             ))}
@@ -170,7 +170,7 @@ const Home: FC = () => {
   );
 };
 
-const features = [
+const qualities = [
   {
     name: 'Barbeiros Especialistas',
     description: 'A nossa equipa experiente oferece cortes de precisão e estilos modernos.',
