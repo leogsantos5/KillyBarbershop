@@ -9,23 +9,14 @@ interface BookingFormProps {
   success?: boolean;
 }
 
-export function BookingForm({
-  onSubmit,
-  onCancel,
-  isLoading,
-  error,
-  success,
-}: BookingFormProps) {
-  const [formData, setFormData] = useState({
-    Name: '',
-    Phone: '',
-  });
+export function BookingForm({onSubmit, onCancel, isLoading, error, success}: BookingFormProps) {
+  const [formData, setFormData] = useState({Name: '', Phone: ''});
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     if (success) {
       // Start fade out animation
-      const fadeTimer = setTimeout(() => {
+      const fadeTimer = setTimeout(() => {  
         setIsClosing(true);
       }, 2000);
 

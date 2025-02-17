@@ -1,7 +1,7 @@
 import { FC } from 'react';
-import { Service } from '../types/booking';
+import { Service as BarberService } from '../types/booking';
 
-const services: Service[] = [
+const services: BarberService[] = [
   {
     name: 'Corte Clássico',
     price: 25,
@@ -28,7 +28,7 @@ const services: Service[] = [
   },
 ];
 
-const Services: FC = () => {
+const BarberServices: FC = () => {
   return (
     <div className="bg-white py-12 sm:py-16">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -64,4 +64,4 @@ const Services: FC = () => {
   );
 };
 
-export default Services;
+export default BarberServices;

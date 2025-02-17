@@ -10,20 +10,36 @@ export interface FormData {
   Phone: string;
 } 
 
-export interface BookingSlotVM {
-  Start: Date;
-  End: Date;
-  Status: string;
-  UserName: string;
-  UserPhone: string;
+export interface Barber {
+  Id: string;
+  Phone: string;
+  Name: string;
+  Status: boolean;
+}
+
+export interface User {
+  Id: string;
+  Phone: string;
+  Name: string;
 }
 
 export interface DbBookedSlot {
   StartTime: string;
   EndTime: string;
-  Status: string;
-  Users: { UserId: string; Name: string; Phone: string }; 
-  // Users is only 1 object, name of property is deceiving (table Users)
+  Status: boolean;
+  Users: User; // It's just one User object
+  Barbers: Barber; // It's just one Barber object
+}
+
+export interface BookingSlotVM {
+  Start: Date;
+  End: Date;
+  Status?: boolean;
+  UserName: string;
+  UserPhone: string;
+  BarberId: string;
+  BarberName: string;
+  BarberPhone: string;
 }
 
 export interface SupabaseError {

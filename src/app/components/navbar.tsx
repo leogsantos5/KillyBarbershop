@@ -7,7 +7,7 @@ function Navbar() {
   
   const navigation = [
     { name: 'Início', href: '/' },
-    { name: 'Serviços', href: '/services' },
+    { name: 'Serviços', href: '/barber-services' },
     { name: 'Marcar', href: '/booking' },
   ];
 
