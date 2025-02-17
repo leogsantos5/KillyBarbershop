@@ -18,7 +18,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, messageId: message.sid });
   } catch (error: unknown) {
-    console.error('SMS sending error:', error);
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

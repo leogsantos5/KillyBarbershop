@@ -15,15 +15,13 @@ export function BookingForm({onSubmit, onCancel, isLoading, error, success}: Boo
 
   useEffect(() => {
     if (success) {
-      // Start fade out animation
       const fadeTimer = setTimeout(() => {  
         setIsClosing(true);
       }, 2000);
 
-      // Close form after animation
       const closeTimer = setTimeout(() => {
         onCancel();
-      }, 4000); // 4s delay + 0.5s animation
+      }, 4000); 
 
       return () => {
         clearTimeout(fadeTimer);
