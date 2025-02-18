@@ -20,6 +20,11 @@ export default {
           '0%': { opacity: '1' },
           '70%': { opacity: '1' },
           '100%': { opacity: '0', display: 'none' }
+        },
+        loading: {
+          '0%': { width: '0%' },
+          '50%': { width: '70%' },
+          '100%': { width: '100%' }
         }
       }
     },

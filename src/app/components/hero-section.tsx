@@ -26,7 +26,10 @@ export function HeroSection() {
         <div className="mt-10">
           <Link
             href="/booking"
-            className="inline-block bg-white px-8 py-4 text-lg font-semibold text-black hover:bg-white rounded-md transition-all duration-300 transform hover:scale-105"
+            className="inline-block bg-white dark:bg-gray-800 px-8 py-4 text-lg font-semibold 
+              text-black dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 
+              rounded-md transition-all duration-300 transform hover:scale-105 
+              border-2 border-transparent dark:border-gray-600"
           >
             Reservar Agora
           </Link>

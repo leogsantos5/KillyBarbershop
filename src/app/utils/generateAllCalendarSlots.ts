@@ -1,7 +1,7 @@
 import { setHours, setMinutes, addMinutes, addDays, getDay, startOfDay } from "date-fns";
 import { Barber, BookingSlotVM } from "../types/booking";
 
-export const generateAvailableSlots = (startDate: Date, endDate: Date, selectedBarber: Barber | null) : BookingSlotVM[] => {
+export const generateAllCalendarSlots = (startDate: Date, endDate: Date, selectedBarber: Barber | null) : BookingSlotVM[] => {
     const slotsVMs: BookingSlotVM[] = [];
     let currentDate = startOfDay(startDate);
   

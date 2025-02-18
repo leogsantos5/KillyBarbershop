@@ -3,9 +3,9 @@ import Image from 'next/image';
 
 export function GallerySection() {
   return (
-    <div className="py-12 bg-white">
+    <div className="py-12 bg-white dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-4xl font-bold text-center mb-12">
+        <h2 className="text-4xl font-bold text-gray-900 dark:text-white text-center mb-12">
           Bem-vindo à Nossa Barbearia
           <div className="w-24 h-1 bg-red-600 mx-auto mt-4"></div>
         </h2>
@@ -52,7 +52,7 @@ export function GallerySection() {
         </div>
 
         <div className="mt-16 text-center">
-          <p className="text-2xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-2xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
             Experimente a combinação perfeita entre barbearia tradicional e estilo moderno na Killy Ross & Xandy Gavira. Onde cada corte conta uma história.
           </p>
           <div className="flex gap-4 justify-center mt-8">

@@ -1,7 +1,7 @@
 import supabase from '../services/supabaseClient';
 import { ErrorMessages } from '../utils/errorMessages';
 import { DbBookedSlot, BookingSlotVM, FormData, Barber } from '../types/booking';
-import { generateAvailableSlots } from '../utils/generateAvailableSlots';
+import { generateAllCalendarSlots } from '../utils/generateAllCalendarSlots';
 import { groupBookingsBySlot } from '../utils/groupBookingsBySlot';
 import { updateAllSlotsAvailability } from '../utils/setAllSlotsAvailability';
 import { usersService } from './usersService';
@@ -22,7 +22,7 @@ export const reservationsService = {
       
       const currentDate = new Date();
       const endDate = new Date(currentDate.getTime() + 28 * 24 * 60 * 60 * 1000);
-      const allSlots = generateAvailableSlots(currentDate, endDate, selectedBarber);
+      const allSlots = generateAllCalendarSlots(currentDate, endDate, selectedBarber);
       const allUpdatedSlots = updateAllSlotsAvailability(allSlots, bookingsBySlot, allBarbers, selectedBarber);
 
       return { success: true, data: allUpdatedSlots };

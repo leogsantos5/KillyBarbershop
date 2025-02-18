@@ -10,8 +10,8 @@ interface DateSelectionStepProps {
 
 export function DateSelectionStep({ slots, onSelectDate, onBack, onNext }: DateSelectionStepProps) {
   return (
-    <div className="bg-white rounded-lg shadow p-4">
-      <h2 className="text-xl font-bold mb-4">Escolha o dia</h2>
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+      <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Escolha o dia</h2>
       <div className="space-y-2 max-h-[60vh] overflow-y-auto pb-4">
         {(() => {
           const elements = [];
@@ -32,11 +32,11 @@ export function DateSelectionStep({ slots, onSelectDate, onBack, onNext }: DateS
                   onSelectDate(date);
                   onNext();
                 }}
-                className="w-full p-4 text-left border rounded-lg hover:bg-gray-50"
+                className="w-full p-4 text-left border dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
               >
-                <div className="font-medium">{format(date, 'EEEE')}</div>
-                <div className="text-gray-600">{format(date, 'd MMMM')}</div>
-                <div className="text-sm text-gray-500">
+                <div className="font-medium text-gray-900 dark:text-white">{format(date, 'EEEE')}</div>
+                <div className="text-gray-600 dark:text-gray-300">{format(date, 'd MMMM')}</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">
                   {daySlots.filter(e => e.Status === undefined).length} horários disponíveis
                 </div>
               </button>
@@ -47,7 +47,7 @@ export function DateSelectionStep({ slots, onSelectDate, onBack, onNext }: DateS
       </div>
       <button
         onClick={onBack}
-        className="mt-4 w-full p-2 text-gray-600 hover:text-gray-800"
+        className="mt-4 w-full p-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white"
       >
         ← Voltar
       </button>

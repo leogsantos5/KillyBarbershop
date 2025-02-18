@@ -16,43 +16,45 @@ export function MobileBooking({ barbers, slots, onSelectBarber, onSelectSlot } :
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   return (
-    <div className="space-y-4">
-      {step === 1 && (
-        <BarberSelectionStep 
-          barbers={barbers}
-          onSelectBarber={onSelectBarber}
-          onNext={() => setStep(2)}
-        />
-      )}
-
-      {step === 2 && (
-        <DateSelectionStep 
-          slots={slots}
-          onSelectDate={setSelectedDate}
-          onBack={() => setStep(1)}
-          onNext={() => setStep(3)}
-        />
-      )}
-
-      {step === 3 && (
-        <TimeSelectionStep 
-          slots={slots}
-          selectedDate={selectedDate}
-          onSelectSlot={onSelectSlot}
-          onBack={() => setStep(2)}
-        />
-      )}
-
-      {/* Progress indicator */}
-      <div className="flex justify-center space-x-2 mt-4">
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className={`h-2 w-2 rounded-full ${
-              step >= i ? 'bg-blue-600' : 'bg-gray-300'
-            }`}
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+      <div className="space-y-4">
+        {step === 1 && (
+          <BarberSelectionStep 
+            barbers={barbers}
+            onSelectBarber={onSelectBarber}
+            onNext={() => setStep(2)}
           />
-        ))}
+        )}
+
+        {step === 2 && (
+          <DateSelectionStep 
+            slots={slots}
+            onSelectDate={setSelectedDate}
+            onBack={() => setStep(1)}
+            onNext={() => setStep(3)}
+          />
+        )}
+
+        {step === 3 && (
+          <TimeSelectionStep 
+            slots={slots}
+            selectedDate={selectedDate}
+            onSelectSlot={onSelectSlot}
+            onBack={() => setStep(2)}
+          />
+        )}
+
+        {/* Progress indicator */}
+        <div className="flex justify-center space-x-2 mt-4">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className={`h-2 w-2 rounded-full ${
+                step >= i ? 'bg-blue-600' : 'bg-gray-300'
+              }`}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -8,18 +8,18 @@ interface BarberSelectionStepProps {
 
 export function BarberSelectionStep({ barbers, onSelectBarber, onNext }: BarberSelectionStepProps) {
   return (
-    <div className="bg-white rounded-lg shadow p-4">
-      <h2 className="text-xl font-bold mb-4">Escolha o Barbeiro</h2>
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+      <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Escolha o Barbeiro</h2>
       <div className="space-y-2">
         <button
           onClick={() => {
             onSelectBarber(null);
             onNext();
           }}
-          className="w-full p-4 text-left border rounded-lg hover:bg-gray-50"
+          className="w-full p-4 text-left border dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
         >
-          <div className="font-medium text-lg">Qualquer Barbeiro</div>
-          <div className="text-sm text-gray-500">Ver todos os horários disponíveis</div>
+          <div className="font-medium text-lg text-gray-900 dark:text-white">Qualquer Barbeiro</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">Ver todos os horários disponíveis</div>
         </button>
         {barbers.map((barber: Barber) => (
           <button
@@ -28,10 +28,10 @@ export function BarberSelectionStep({ barbers, onSelectBarber, onNext }: BarberS
               onSelectBarber(barber);
               onNext();
             }}
-            className="w-full p-4 text-left border rounded-lg hover:bg-gray-50"
+            className="w-full p-4 text-left border dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
           >
-            <div className="font-medium text-lg">{barber.Name}</div>
-            <div className="text-sm text-gray-500">Ver horários específicos</div>
+            <div className="font-medium text-lg text-gray-900 dark:text-white">{barber.Name}</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">Ver horários específicos</div>
           </button>
         ))}
       </div>

@@ -97,7 +97,7 @@ const BookingPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-6 px-6">
       <div className="max-w-7xl mx-auto">
         {isMobile ? (
           <MobileBooking barbers={barbers} slots={slots} onSelectBarber={setSelectedBarber} onSelectSlot={handleSelectSlotEvent} />

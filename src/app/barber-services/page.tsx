@@ -30,14 +30,14 @@ const services: BarberService[] = [
 
 const BarberServices: FC = () => {
   return (
-    <div className="bg-white py-12 sm:py-16">
+    <div className="bg-white dark:bg-gray-900 py-12">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-5xl font-bold tracking-tight text-gray-900 mb-4">
+          <h2 className="text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-4">
             Os Nossos Serviços
           </h2>
           <div className="w-24 h-1 bg-red-600 mx-auto mb-8"></div>
-          <p className="text-xl leading-8 text-gray-600">
+          <p className="text-xl leading-8 text-gray-600 dark:text-gray-300">
             Cortes de cabelo profissionais e serviços de barbearia para todos os estilos
           </p>
         </div>
@@ -45,16 +45,16 @@ const BarberServices: FC = () => {
           {services.map((service) => (
             <div
               key={service.name}
-              className="flex flex-col border-2 rounded-lg p-8 hover:border-blue-600 hover:shadow-xl transition-all duration-300 group">
+              className="flex flex-col border-2 dark:border-gray-700 rounded-lg p-8 hover:border-blue-600 dark:hover:border-blue-500 transition-all duration-300 group bg-white dark:bg-gray-800">
               <div className="flex items-center justify-between">
-                <h3 className="text-2xl font-bold text-gray-900 group-hover:text-blue-700 transition-colors">
+                <h3 className="text-2xl font-bold text-gray-900 group-hover:text-blue-700 transition-colors dark:text-white">
                   {service.name}
                 </h3>
                 <div className="text-xl font-bold text-red-600">
                   {service.price}€
                 </div>
               </div>
-              <p className="mt-4 text-lg leading-7 text-gray-600">{service.description}</p>
+              <p className="mt-4 text-lg leading-7 text-gray-600 dark:text-gray-300">{service.description}</p>
               <p className="mt-4 text-sm font-medium text-black-700">Duration: {service.duration}</p>
             </div>
           ))}

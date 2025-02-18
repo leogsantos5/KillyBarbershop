@@ -10,8 +10,8 @@ interface TimeSelectionStepProps {
 
 export function TimeSelectionStep({ slots, selectedDate, onSelectSlot, onBack }: TimeSelectionStepProps) {
   return (
-    <div className="bg-white rounded-lg shadow p-4">
-      <h2 className="text-xl font-bold mb-4">Escolha a hora</h2>
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+      <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Escolha a hora</h2>
       <div className="grid grid-cols-2 gap-2">
         {slots
           .filter(event => 
@@ -25,8 +25,8 @@ export function TimeSelectionStep({ slots, selectedDate, onSelectSlot, onBack }:
               className={`
                 p-3 text-center border rounded-lg transition-colors
                 ${slot.Status === undefined
-                  ? 'bg-green-100 hover:bg-green-200 text-green-800 border-green-200' 
-                  : 'bg-red-100 text-red-800 border-red-200 cursor-not-allowed'
+                  ? 'bg-green-100 dark:bg-green-800 hover:bg-green-200 dark:hover:bg-green-700 text-green-800 dark:text-green-100 border-green-200 dark:border-green-600' 
+                  : 'bg-red-100 dark:bg-red-800 text-red-800 dark:text-red-100 border-red-200 dark:border-red-600 cursor-not-allowed'
                 }
               `}
             >
@@ -36,7 +36,7 @@ export function TimeSelectionStep({ slots, selectedDate, onSelectSlot, onBack }:
       </div>
       <button
         onClick={onBack}
-        className="mt-4 w-full p-2 text-gray-600 hover:text-gray-800"
+        className="mt-4 w-full p-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white"
       >
         ← Voltar
       </button>

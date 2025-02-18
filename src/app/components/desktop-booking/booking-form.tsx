@@ -40,10 +40,10 @@ export function BookingForm({onSubmit, onCancel, isLoading, error, success}: Boo
       className={`fixed inset-0 bg-black transition-opacity duration-500 flex items-center justify-center p-4 ${
         isClosing ? 'bg-opacity-0' : 'bg-opacity-50'}`}>
       <div
-        className={`bg-white rounded-xl p-8 max-w-md w-full transition-all duration-500 ${
+        className={`bg-white dark:bg-gray-800 rounded-xl p-8 max-w-md w-full transition-all duration-500 ${
           isClosing ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'}`}
       >
-        <h3 className="text-2xl font-bold mb-4">Nova Reserva</h3>
+        <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Nova Reserva</h3>
 
         {error && (
           <div className="mb-4 p-3 text-red-700 bg-red-100 rounded-md text-sm">
@@ -60,17 +60,18 @@ export function BookingForm({onSubmit, onCancel, isLoading, error, success}: Boo
         {!success && (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Nome</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nome</label>
               <input
                 type="text"
                 required
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 
+                bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2"
                 value={formData.Name}
                 onChange={(e) => setFormData((prev) => ({ ...prev, Name: e.target.value }))}/>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Telemóvel</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Telemóvel</label>
               <div className="relative mt-1">
                 <span className="absolute inset-y-0 left-3 flex items-center text-gray-500 pointer-events-none mr-2">
                   +351
@@ -79,7 +80,8 @@ export function BookingForm({onSubmit, onCancel, isLoading, error, success}: Boo
                   type="tel"
                   required
                   pattern="[0-9]{9}"
-                  className="pl-14 block w-full rounded-md border border-gray-300 px-3 py-2"
+                  className="pl-14 block w-full rounded-md border border-gray-300 dark:border-gray-600 
+                  bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2"
                   value={formData.Phone}
                   onChange={(e) => setFormData((prev) => ({ ...prev, Phone: e.target.value }))}
                 />
