@@ -31,20 +31,26 @@ const BookingPage = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      setIsLoading(true);
-      
       const { data: barbersData } = await barbersService.fetchBarbers();
       if (barbersData) {
         setBarbers(barbersData);
-        const { data: slotsData } = await reservationsService.fetchReservations(selectedBarber, barbersData);
-        if (slotsData) {
-          setSlots(slotsData);
-        }
-      }      
+      }
       setIsLoading(false);
     };
     loadData();
-  }, [selectedBarber]);
+  }, []);
+
+  useEffect(() => {
+    const loadSlots = async () => {
+      if (selectedBarber || barbers.length > 0) {
+        const { data: slotsData } = await reservationsService.fetchReservations(selectedBarber, barbers);
+        if (slotsData) {
+          setSlots(slotsData);
+        }
+      }
+    };
+    loadSlots();
+  }, [selectedBarber, barbers]);
 
   const handleSelectSlotEvent = (event: BookingSlotVM) => {
     if (event.Status === undefined) {
@@ -74,7 +80,6 @@ const BookingPage = () => {
         setFormError(result.error as string);
       }
     } catch {
-      debugger;
       setFormError(ErrorMessages.RESERVATION.CREATE_RESERVATION_FAILURE);
     } finally {
       setFormLoading(false);
