@@ -2,7 +2,6 @@ import { Barber, DbBookedSlot } from "../types/booking";
 
 export function calculateLeastOccupiedBarberForDay(reservationDay: Date, availableBarbers: Barber[], 
                                                    allBookedSlots: DbBookedSlot[]): string {
-    debugger;
     const barberAppearances: Record<string, number> = {}; 
 
     // Filter booked slots for the given day

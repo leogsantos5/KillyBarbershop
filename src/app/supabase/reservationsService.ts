@@ -3,6 +3,8 @@ import { ErrorMessages } from '../utils/errorMessages';
 import { DbBookedSlot, BookingSlotVM, FormData, Barber } from '../types/booking';
 import { usersService } from './usersService';
 import { calculateLeastOccupiedBarberForDay } from '../utils/calculateLeastOccupiedBarber';
+import { sendConfirmationSMS } from '../services/twilioService';
+import { PAID_FEATURES } from '../utils/navigationPages';
 
 export const reservationsService = {
   async fetchReservations() {
@@ -29,12 +31,6 @@ export const reservationsService = {
 
   async createReservation(formData: FormData, selectedSlot: BookingSlotVM, bookedSlots: DbBookedSlot[], barbers: Barber[]) {
     try {
-      // First validate the phone
-      /* const isValidPhone = await validatePortuguesePhone(formData.Phone);
-      if (!isValidPhone) {
-        throw new Error(ErrorMessages.FORM.INVALID_PHONE);
-      } */
-
       const existingUser = await usersService.findUserByPhone(formData.Phone);
 
       let userId: string;
@@ -60,12 +56,19 @@ export const reservationsService = {
         throw new Error(ErrorMessages.RESERVATION.ACTIVE_RESERVATION);
       }
       
+      if (PAID_FEATURES.SEND_SMS) {
+        const formattedStringDate = selectedSlot.Start.toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric',
+                                                                                 hour: '2-digit', minute: '2-digit' })
+        await sendConfirmationSMS(formData.Phone, formData.Name, formattedStringDate);
+      }
+
       return { success: true };
     } catch (error) {
-        return { 
-          success: false, 
-          error: error instanceof Error ? error.message : ErrorMessages.RESERVATION.CREATE_RESERVATION_FAILURE
-        };
-      }
+      console.error('Error creating reservation:', error);
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : ErrorMessages.RESERVATION.CREATE_RESERVATION_FAILURE
+      };
+    }
   }
 };

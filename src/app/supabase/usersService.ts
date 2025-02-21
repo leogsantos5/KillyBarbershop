@@ -1,18 +1,16 @@
 import supabase from '../services/supabaseClient';
 import { ErrorMessages } from '../utils/errorMessages';
 import { formatPhoneNumber } from '../utils/formatPhoneNumberByCountry';
+import { validatePortuguesePhone } from '../services/numVerifyService';
+import { PAID_FEATURES } from '../utils/navigationPages';
 
 export const usersService = {
   async findUserByPhone(phone: string) {
-    // First validate the phone
-      /* const isValidPhone = await validatePortuguesePhone(formData.Phone);
-      if (!isValidPhone) {
-        throw new Error(ErrorMessages.FORM.INVALID_PHONE);
-      } */
-     
-    // Format phone number to add Portuguese country code if not present
     const formattedPhone = formatPhoneNumber(phone, 'PT');
-    
+    if (!formattedPhone) {
+      throw new Error(ErrorMessages.FORM.INVALID_PHONE_FORMAT);
+    }
+     
     const { data: user, error } = await supabase
       .from('Users')
       .select('Id')
@@ -24,15 +22,25 @@ export const usersService = {
   },
 
   async createUser(name: string, phone: string) {
-    if (!phone.startsWith('+')) {
-      phone = formatPhoneNumber(phone, 'PT');
-    }
     
+    const formattedPhone = formatPhoneNumber(phone, 'PT');
+    if (!formattedPhone) {
+      throw new Error(ErrorMessages.FORM.INVALID_PHONE_FORMAT);
+    }
+
+    if (PAID_FEATURES.VALIDATE_PHONE) {
+      const isValidPhone = await validatePortuguesePhone(formattedPhone);
+      if (!isValidPhone) {
+        throw new Error(ErrorMessages.FORM.INVALID_PHONE);
+      }
+    }
+
+    // If all validations pass, create user
     const { data: newUser, error } = await supabase
-      .from('Users').insert([{ 
-        Name: name,
-        Phone: phone
-      }]).select('Id').single();        
+      .from('Users')
+      .insert([{ Name: name, Phone: formattedPhone }])
+      .select('Id')
+      .single();        
 
     if (error) {
       if (error.code === '23505') {

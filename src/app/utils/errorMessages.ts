@@ -10,7 +10,8 @@ export const ErrorMessages = {
     FORM: {
       REQUIRED_NAME: 'Nome é obrigatório',
       REQUIRED_PHONE: 'Número de telemóvel é obrigatório',
-      INVALID_PHONE: 'Número de telemóvel inválido',
+      INVALID_PHONE_FORMAT: 'Formato de número de telemóvel inválido',
+      INVALID_PHONE: 'Número de telemóvel não existe',
       COUNTRY_CODE_NOT_SUPPORTED: 'País não suportado',
       SLOT_REQUIRED: 'Por favor selecione um horário'
     },

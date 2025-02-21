@@ -1,31 +1,13 @@
-import { ErrorMessages } from './errorMessages';
-
-type CountryCode = 'PT' | 'ES' | 'FR' | 'DE' | 'IT' | 'UK';
-
-export function formatPhoneNumber(phone: string, country: CountryCode): string {
-  // Remove any non-digit characters except '+'
-  const cleanPhone = phone.replace(/[^\d+]/g, '');
+export function formatPhoneNumber(phone: string, country: string) : string | null {
+  const cleanPhone = phone.replace(/\s/g, '');
   
-  // If already has international format, return as is
-  if (cleanPhone.startsWith('+')) return cleanPhone;
-
-  // Remove leading zeros
-  const numberWithoutZeros = cleanPhone.replace(/^0+/, '');
-
   switch (country) {
     case 'PT':
-      return `+351${numberWithoutZeros}`;
-    case 'ES':
-      return `+34${numberWithoutZeros}`;
-    case 'FR':
-      return `+33${numberWithoutZeros}`;
-    case 'DE':
-      return `+49${numberWithoutZeros}`;
-    case 'IT':
-      return `+39${numberWithoutZeros}`;
-    case 'UK':
-      return `+44${numberWithoutZeros}`;
+      const ptRegex = /^(\+351|00351)?[1-9][0-9]{8}$/;
+      if (!ptRegex.test(cleanPhone)) return null;
+      return cleanPhone.startsWith('+351') ? cleanPhone : `+351${cleanPhone}`;
+    // Add other countries as needed
     default:
-      throw new Error(ErrorMessages.FORM.COUNTRY_CODE_NOT_SUPPORTED);
+      return null;
   }
 }
