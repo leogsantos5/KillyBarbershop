@@ -1,13 +1,11 @@
 import supabase from '../services/supabaseClient';
 import { ErrorMessages } from '../utils/errorMessages';
 import { DbBookedSlot, BookingSlotVM, FormData, Barber } from '../types/booking';
-import { generateAllCalendarSlots } from '../utils/generateAllCalendarSlots';
-import { groupBookingsBySlot } from '../utils/groupBookingsBySlot';
-import { updateAllSlotsAvailability } from '../utils/setAllSlotsAvailability';
 import { usersService } from './usersService';
+import { calculateLeastOccupiedBarberForDay } from '../utils/calculateLeastOccupiedBarber';
 
 export const reservationsService = {
-  async fetchReservations(selectedBarber: Barber | null, allBarbers: Barber[] = []) {
+  async fetchReservations() {
     try {
       const query = supabase
         .from('Reservations')
@@ -15,23 +13,21 @@ export const reservationsService = {
                  Users (Id, Name, Phone),
                  Barbers (Id, Name, Phone)`);
 
-      const queryResult = await query;
-      const bookedSlots = queryResult.data as unknown as DbBookedSlot[];
-      if (queryResult.error) throw ErrorMessages.RESERVATION.FETCH_RESERVATIONS_FAILURE;
-      const bookingsBySlot = groupBookingsBySlot(bookedSlots);
+      const { data, error } = await query;
       
-      const currentDate = new Date();
-      const endDate = new Date(currentDate.getTime() + 28 * 24 * 60 * 60 * 1000);
-      const allSlots = generateAllCalendarSlots(currentDate, endDate, selectedBarber);
-      const allUpdatedSlots = updateAllSlotsAvailability(allSlots, bookingsBySlot, allBarbers, selectedBarber);
-
-      return { success: true, data: allUpdatedSlots };
-    } catch {
-      return { success: false, error: new Error(ErrorMessages.RESERVATION.RESERVATIONS_PROCESSING_FAILURE) };
+      if (error) throw ErrorMessages.RESERVATION.FETCH_RESERVATIONS_FAILURE;
+      
+      return { success: true, data: data as unknown as DbBookedSlot[] };
+    } 
+    catch {
+      return { 
+        success: false, 
+        error: new Error(ErrorMessages.RESERVATION.FETCH_RESERVATIONS_FAILURE) 
+      };
     }
   },
 
-  async createReservation(formData: FormData, selectedSlot: BookingSlotVM) {
+  async createReservation(formData: FormData, selectedSlot: BookingSlotVM, bookedSlots: DbBookedSlot[], barbers: Barber[]) {
     try {
       // First validate the phone
       /* const isValidPhone = await validatePortuguesePhone(formData.Phone);
@@ -48,12 +44,19 @@ export const reservationsService = {
       } else {
         userId = existingUser.data.Id;
       }
+      
+      let barberId = selectedSlot.BarberId;
+      const reservationDay = new Date(selectedSlot.Start);
+      if (barberId === '' || barberId === null) {
+        barberId = calculateLeastOccupiedBarberForDay(reservationDay, barbers, bookedSlots);
+      }
+
       const { error: reservationError } = await supabase
         .from('Reservations')
-        .insert([{UserId: userId, BarberId: selectedSlot.BarberId != '' ? selectedSlot.BarberId : null,
+        .insert([{UserId: userId, BarberId: barberId,
                   Status: false, StartTime: selectedSlot.Start.toISOString(), EndTime: selectedSlot.End.toISOString()}]);
       
-                  if (reservationError?.code === '23505') {
+      if (reservationError?.code === '23505') {
         throw new Error(ErrorMessages.RESERVATION.ACTIVE_RESERVATION);
       }
       

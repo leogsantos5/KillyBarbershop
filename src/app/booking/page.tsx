@@ -12,6 +12,7 @@ import { MobileBooking } from '../components/mobile-booking/mobile-booking';
 import { DesktopBooking } from '../components/desktop-booking/booking-calendar';
 import { BookingForm } from '../components/desktop-booking/booking-form';
 import { ErrorMessages } from '../utils/errorMessages';
+import { updateAllSlotsFromReservations } from '../utils/updateAllSlotsFromReservations';
 
 const locales = { 'pt': pt };
 const localizer = dateFnsLocalizer({format, parse, startOfWeek, getDay, locales });
@@ -21,7 +22,7 @@ const BookingPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [barbers, setBarbers] = useState<Barber[]>([]);
   const [selectedBarber, setSelectedBarber] = useState<Barber | null>(null);
-  const [slots, setSlots] = useState<BookingSlotVM[]>([]);
+  const [allSlots, setAllSlots] = useState<BookingSlotVM[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<BookingSlotVM | null>(null);
   const [date, setDate] = useState(new Date());
   const [showReservationForm, setShowReservationForm] = useState(false);
@@ -43,9 +44,10 @@ const BookingPage = () => {
   useEffect(() => {
     const loadSlots = async () => {
       if (selectedBarber || barbers.length > 0) {
-        const { data: slotsData } = await reservationsService.fetchReservations(selectedBarber, barbers);
-        if (slotsData) {
-          setSlots(slotsData);
+        const { data: bookedSlots } = await reservationsService.fetchReservations();
+        if (bookedSlots) {
+          const allSlotsUpdated = updateAllSlotsFromReservations(bookedSlots, selectedBarber, barbers);
+          setAllSlots(allSlotsUpdated);
         }
       }
     };
@@ -67,18 +69,18 @@ const BookingPage = () => {
     setFormSuccess(false);
     
     try {
-      const result = await reservationsService.createReservation(formData, selectedSlot);
-      
-      if (result.success) {
-        setFormSuccess(true);
-        const { data: newSlots } = await reservationsService.fetchReservations(selectedBarber, barbers);
-        if (newSlots) {
-          setSlots(newSlots);
+      const { data: bookedSlots } = await reservationsService.fetchReservations(); 
+      if (bookedSlots != null) {
+        const result = await reservationsService.createReservation(formData, selectedSlot, bookedSlots, barbers);
+        if (result.success) {
+          const allSlotsUpdated = updateAllSlotsFromReservations(bookedSlots, selectedBarber, barbers);
+          setAllSlots(allSlotsUpdated);
+          setFormSuccess(true);       
+        } 
+        else {
+          setFormError(result.error as string);
         }
       } 
-      else {
-        setFormError(result.error as string);
-      }
     } catch {
       setFormError(ErrorMessages.RESERVATION.CREATE_RESERVATION_FAILURE);
     } finally {
@@ -105,9 +107,9 @@ const BookingPage = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-6 px-6">
       <div className="max-w-7xl mx-auto">
         {isMobile ? (
-          <MobileBooking barbers={barbers} slots={slots} onSelectBarber={setSelectedBarber} onSelectSlot={handleSelectSlotEvent} />
+          <MobileBooking barbers={barbers} slots={allSlots} onSelectBarber={setSelectedBarber} onSelectSlot={handleSelectSlotEvent} />
         ) : (
-          <DesktopBooking barbers={barbers} slots={slots} selectedBarber={selectedBarber} onSelectBarber={setSelectedBarber} 
+          <DesktopBooking barbers={barbers} slots={allSlots} selectedBarber={selectedBarber} onSelectBarber={setSelectedBarber} 
                           onSelectSlot={handleSelectSlotEvent} date={date} onDateChange={setDate} localizer={localizer} />
         )}
 
