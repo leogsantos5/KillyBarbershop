@@ -10,7 +10,7 @@ import { barbersService } from '../supabase/barbersService';
 import { reservationsService } from '../supabase/reservationsService';
 import { MobileBooking } from '../components/mobile-booking/mobile-booking';
 import { DesktopBooking } from '../components/desktop-booking/booking-calendar';
-import { BookingForm } from '../components/desktop-booking/booking-form';
+import { BookingForm } from '../components/booking-form';
 import { ErrorMessages } from '../utils/errorMessages';
 import { updateAllSlotsFromReservations } from '../utils/updateAllSlotsFromReservations';
 

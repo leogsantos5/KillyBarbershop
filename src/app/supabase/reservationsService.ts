@@ -29,6 +29,46 @@ export const reservationsService = {
     }
   },
 
+  async deletePastReservations(userId: string | null, presentDay: string) : Promise<boolean> {
+    let queryResult; 
+    if (userId == null){ // deletes all past reservations
+      queryResult = await supabase.from('Reservations').delete().lt('StartTime', presentDay);
+    }
+    else{ // deletes all past reservations for a specific user
+      queryResult = await supabase.from('Reservations').delete({ count: 'exact' }).eq('UserId', userId).lt('StartTime', presentDay);
+      console.log(queryResult.count);
+    }
+
+    if (queryResult.error) throw new Error(ErrorMessages.RESERVATION.DELETE_RESERVATIONS_FAILURE);
+
+    return true;
+  },
+
+  async fecthExistingReservationForUser(userId: string, presentDay: string) : Promise<DbBookedSlot | null> {
+    const queryResult = await supabase.from('Reservations')
+                                      .select('*')
+                                      .eq('UserId', userId);
+
+    if (queryResult.error) throw new Error(ErrorMessages.RESERVATION.FETCH_RESERVATIONS_FAILURE);
+
+    const allUserReservations = queryResult.data as unknown as DbBookedSlot[];
+    if (allUserReservations === null || allUserReservations.length === 0)
+      return null;
+
+    const existingReservation = allUserReservations.find(reservation => {
+      return reservation.StartTime === presentDay || reservation.StartTime >= presentDay;
+    }); // retrieves the user's valid existing reservation 
+
+    const pastReservations = allUserReservations.filter(reservation => {
+      return reservation.StartTime < presentDay; // check if user has past reservations
+    });
+
+    if (pastReservations.length > 0) // deletes all the user's past reservations
+      await this.deletePastReservations(userId, presentDay);
+
+    return existingReservation ?? null;
+  },
+
   async createReservation(formData: FormData, selectedSlot: BookingSlotVM, bookedSlots: DbBookedSlot[], barbers: Barber[]) {
     try {
       const existingUser = await usersService.findUserByPhone(formData.Phone);
@@ -40,21 +80,24 @@ export const reservationsService = {
       } else {
         userId = existingUser.data.Id;
       }
+
+      const presentDay = new Date().toISOString();
+      const existingReservation = await this.fecthExistingReservationForUser(userId, presentDay);
+      if (existingReservation)
+        throw new Error(ErrorMessages.RESERVATION.ACTIVE_RESERVATION);
       
       let barberId = selectedSlot.BarberId;
-      const reservationDay = new Date(selectedSlot.Start);
+      const reservationDay = selectedSlot.Start;
       if (barberId === '' || barberId === null) {
         barberId = calculateLeastOccupiedBarberForDay(reservationDay, barbers, bookedSlots);
       }
 
-      const { error: reservationError } = await supabase
-        .from('Reservations')
-        .insert([{UserId: userId, BarberId: barberId,
-                  Status: false, StartTime: selectedSlot.Start.toISOString(), EndTime: selectedSlot.End.toISOString()}]);
-      
-      if (reservationError?.code === '23505') {
-        throw new Error(ErrorMessages.RESERVATION.ACTIVE_RESERVATION);
-      }
+      const queryResult = await supabase.from('Reservations')
+                                        .insert([{UserId: userId, BarberId: barberId, Status: false, 
+                                                  StartTime: selectedSlot.Start.toISOString(), 
+                                                  EndTime: selectedSlot.End.toISOString()}]);
+                              
+      if (queryResult.error) throw new Error(ErrorMessages.RESERVATION.CREATE_RESERVATION_FAILURE);
       
       if (PAID_FEATURES.SEND_SMS) {
         const formattedStringDate = selectedSlot.Start.toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric',

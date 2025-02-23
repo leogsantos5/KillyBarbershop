@@ -5,7 +5,8 @@ export const ErrorMessages = {
       CREATE_RESERVATION_FAILURE: 'Não foi possível criar a reserva.',
       CREATE_USER_FAILURE: 'Não foi possível criar um novo utilizador.',
       FETCH_RESERVATIONS_FAILURE: 'Ocorreu um erro ao carregar as reservas da base de dados.',
-      RESERVATIONS_PROCESSING_FAILURE: 'Ocorreu um erro ao processar as reservas.'
+      RESERVATIONS_PROCESSING_FAILURE: 'Ocorreu um erro ao processar as reservas.',
+      DELETE_RESERVATIONS_FAILURE: 'Ocorreu um erro ao eliminar as reservas.'
     },
     FORM: {
       REQUIRED_NAME: 'Nome é obrigatório',

@@ -1,5 +1,7 @@
 'use client'; 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { navigationPages } from '../utils/navigationPages';
 
 interface BookingFormProps {
   onSubmit: (formData: { Name: string; Phone: string }) => void;
@@ -12,22 +14,25 @@ interface BookingFormProps {
 export function BookingForm({onSubmit, onCancel, isLoading, error, success}: BookingFormProps) {
   const [formData, setFormData] = useState({Name: '', Phone: ''});
   const [isClosing, setIsClosing] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     if (success) {
       const fadeTimer = setTimeout(() => {  
         setIsClosing(true);
-      }, 2000);
+      }, 1000);
 
       const closeTimer = setTimeout(() => {
         onCancel();
-      }, 4000); 
+        router.push(navigationPages.find(page => page.name === 'Home')?.href ?? '/');
+      }, 2000); 
 
       return () => {
         clearTimeout(fadeTimer);
         clearTimeout(closeTimer);
       };
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [success, onCancel]);
 
   const handleSubmit = (e: React.FormEvent) => {
