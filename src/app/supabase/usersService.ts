@@ -3,9 +3,10 @@ import { ErrorMessages } from '../utils/errorMessages';
 import { formatPhoneNumber } from '../utils/formatPhoneNumberByCountry';
 import { validatePortuguesePhone } from '../services/numVerifyService';
 import { PAID_FEATURES } from '../utils/navigationPages';
+import { User } from '../types/booking';
 
 export const usersService = {
-  async findUserByPhone(phone: string) {
+  async findUserByPhone(phone: string) : Promise<User | null> {
     const formattedPhone = formatPhoneNumber(phone, 'PT');
     if (!formattedPhone) {
       throw new Error(ErrorMessages.FORM.INVALID_PHONE_FORMAT);
@@ -13,15 +14,15 @@ export const usersService = {
      
     const { data: user, error } = await supabase
       .from('Users')
-      .select('Id')
+      .select('*')
       .eq('Phone', formattedPhone)
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
-    return { success: true, data: user };
+    return user;
   },
 
-  async createUser(name: string, phone: string) {
+  async createUser(name: string, phone: string) : Promise<User> {
     
     const formattedPhone = formatPhoneNumber(phone, 'PT');
     if (!formattedPhone) {
@@ -35,12 +36,9 @@ export const usersService = {
       }
     }
 
-    // If all validations pass, create user
-    const { data: newUser, error } = await supabase
-      .from('Users')
-      .insert([{ Name: name, Phone: formattedPhone }])
-      .select('Id')
-      .single();        
+    const { data: newUser, error } = await supabase.from('Users')
+                                    .insert([{ Name: name, Phone: formattedPhone }])
+                                    .select('*').single();        
 
     if (error) {
       if (error.code === '23505') {
@@ -50,6 +48,6 @@ export const usersService = {
     }
 
     if (!newUser) throw new Error(ErrorMessages.RESERVATION.CREATE_USER_FAILURE);
-    return { success: true, data: newUser };
+    return newUser;
   }
 };

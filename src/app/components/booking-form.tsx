@@ -42,10 +42,10 @@ export function BookingForm({onSubmit, onCancel, isLoading, error, success}: Boo
 
   return (
     <div
-      className={`fixed inset-0 bg-black transition-opacity duration-500 flex items-center justify-center p-4 ${
+      className={`fixed inset-0 bg-black transition-opacity duration-500 flex items-center justify-center p-4 z-50 ${
         isClosing ? 'bg-opacity-0' : 'bg-opacity-50'}`}>
       <div
-        className={`bg-white dark:bg-gray-800 rounded-xl p-8 max-w-md w-full transition-all duration-500 ${
+        className={`bg-white dark:bg-gray-800 rounded-xl p-8 max-w-md w-full transition-all duration-500 z-50 ${
           isClosing ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'}`}
       >
         <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Nova Reserva</h3>

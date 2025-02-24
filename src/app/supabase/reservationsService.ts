@@ -74,11 +74,11 @@ export const reservationsService = {
       const existingUser = await usersService.findUserByPhone(formData.Phone);
 
       let userId: string;
-      if (!existingUser) {
+      if (existingUser == null) {
         const newUser = await usersService.createUser(formData.Name, formData.Phone);
-        userId = newUser.data.Id;
+        userId = newUser.Id;
       } else {
-        userId = existingUser.data.Id;
+        userId = existingUser.Id;
       }
 
       const presentDay = new Date().toISOString();
