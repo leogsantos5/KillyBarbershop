@@ -49,5 +49,60 @@ export const usersService = {
 
     if (!newUser) throw new Error(ErrorMessages.RESERVATION.CREATE_USER_FAILURE);
     return newUser;
+  },
+
+  async fetchAllUsers(page: number = 1, pageSize: number = 10, searchTerm: string = '') {
+    try {
+      let query = supabase
+        .from('Users')
+        .select('*', { count: 'exact' });
+
+      // Apply search filter if searchTerm exists
+      if (searchTerm) {
+        query = query.or(`Name.ilike.%${searchTerm}%,Phone.ilike.%${searchTerm}%`);
+      }
+
+      // Apply pagination
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+      query = query.range(from, to).order('Name');
+
+      const { data, error, count } = await query;
+
+      if (error) throw ErrorMessages.USER.FETCH_FAILURE;
+      
+      return { 
+        success: true, 
+        data: data as User[],
+        total: count || 0,
+        page,
+        pageSize
+      };
+    } 
+    catch {
+      return { 
+        success: false, 
+        error: new Error(ErrorMessages.USER.FETCH_FAILURE) 
+      };
+    }
+  },
+
+  async toggleUserStatus(userId: string, newStatus: boolean) {
+    try {
+      const { error } = await supabase
+        .from('Users')
+        .update({ Status: newStatus })
+        .eq('Id', userId);
+
+      if (error) throw ErrorMessages.USER.UPDATE_STATUS_FAILURE;
+      
+      return { success: true };
+    } 
+    catch {
+      return { 
+        success: false, 
+        error: new Error(ErrorMessages.USER.UPDATE_STATUS_FAILURE) 
+      };
+    }
   }
 };

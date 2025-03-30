@@ -14,16 +14,19 @@ export interface Barber {
   Id: string;
   Phone: string;
   Name: string;
+  Password: string;
   Status: boolean;
 }
 
-export interface User {
+export type User = {
   Id: string;
-  Phone: string;
   Name: string;
-}
+  Phone: string;
+  Status: boolean;
+};
 
 export interface DbBookedSlot {
+  Id: string;
   StartTime: string;
   EndTime: string;
   Status: boolean;

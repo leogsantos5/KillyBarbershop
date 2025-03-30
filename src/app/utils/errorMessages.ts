@@ -2,11 +2,21 @@ export const ErrorMessages = {
     RESERVATION: {
       DUPLICATE_PHONE: 'Já existe uma reserva associada a este número de telemóvel.',
       ACTIVE_RESERVATION: 'Já tem uma reserva ativa. Não é possível fazer mais que uma reserva.',
-      CREATE_RESERVATION_FAILURE: 'Não foi possível criar a reserva.',
+      CREATE_FAILURE: 'Não foi possível criar a reserva.',
       CREATE_USER_FAILURE: 'Não foi possível criar um novo utilizador.',
-      FETCH_RESERVATIONS_FAILURE: 'Ocorreu um erro ao carregar as reservas da base de dados.',
-      RESERVATIONS_PROCESSING_FAILURE: 'Ocorreu um erro ao processar as reservas.',
-      DELETE_RESERVATIONS_FAILURE: 'Ocorreu um erro ao eliminar as reservas.'
+      FETCH_FAILURE: 'Ocorreu um erro ao carregar as reservas da base de dados.',
+      PROCESSING_FAILURE: 'Ocorreu um erro ao processar as reservas.',
+      DELETE_FAILURE: 'Ocorreu um erro ao eliminar as reservas.'
+    },
+    BARBER: {
+      CREATE_FAILURE: 'Não foi possível adicionar o barbeiro.',
+      DELETE_FAILURE: 'Não foi possível eliminar o barbeiro.',
+      UPDATE_STATUS_FAILURE: 'Não foi possível atualizar o estado do barbeiro.',
+      FETCH_FAILURE: 'Ocorreu um erro ao carregar os barbeiros.'
+    },
+    USER: {
+      FETCH_FAILURE: 'Erro ao carregar os utilizadores',
+      UPDATE_STATUS_FAILURE: 'Erro ao atualizar o estado do utilizador'
     },
     FORM: {
       REQUIRED_NAME: 'Nome é obrigatório',

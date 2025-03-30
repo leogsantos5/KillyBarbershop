@@ -2,6 +2,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { navigationPages } from '../utils/navigationPages';
+import Swal from 'sweetalert2';
+import { Barber } from '../types/booking';
 
 interface BookingFormProps {
   onSubmit: (formData: { Name: string; Phone: string }) => void;
@@ -9,9 +11,11 @@ interface BookingFormProps {
   isLoading: boolean;
   error?: string;
   success?: boolean;
+  selectedDate: Date;
+  selectedBarber?: Barber | null;
 }
 
-export function BookingForm({onSubmit, onCancel, isLoading, error, success}: BookingFormProps) {
+export function BookingForm({onSubmit, onCancel, isLoading, error, success, selectedDate, selectedBarber}: BookingFormProps) {
   const [formData, setFormData] = useState({Name: '', Phone: ''});
   const [isClosing, setIsClosing] = useState(false);
   const router = useRouter();
@@ -32,12 +36,40 @@ export function BookingForm({onSubmit, onCancel, isLoading, error, success}: Boo
         clearTimeout(closeTimer);
       };
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [success, onCancel]);
+  }, [success, onCancel, router]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    
+    const formattedDate = selectedDate.toLocaleDateString('pt-PT', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric'
+    });
+    const formattedTime = selectedDate.toLocaleTimeString('pt-PT', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    const barberText = selectedBarber ? ` com ${selectedBarber.Name}` : '';
+
+    const result = await Swal.fire({
+      title: 'Confirmar Reserva',
+      html: `Tem certeza que deseja fazer uma reserva para:<br>
+             <strong>${formattedDate}</strong><br>
+             às <strong>${formattedTime}</strong>${barberText}?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sim, reservar!',
+      cancelButtonText: 'Cancelar',
+      width: '400px'
+    });
+
+    if (result.isConfirmed) {
+      onSubmit(formData);
+    }
   };
 
   return (
@@ -104,7 +136,7 @@ export function BookingForm({onSubmit, onCancel, isLoading, error, success}: Boo
                 type="submit"
                 disabled={isLoading}
                 className="flex-1 px-4 py-2 text-white bg-green-600 rounded-md hover:bg-green-700 disabled:opacity-50">
-                {isLoading ? 'A Processar...' : 'Confirmar'}
+                {isLoading ? 'A Processar...' : 'Reservar'}
               </button>
             </div>
           </form>

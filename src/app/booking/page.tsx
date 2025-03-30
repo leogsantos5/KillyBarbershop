@@ -1,4 +1,5 @@
 'use client';
+
 import { useState, useEffect } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { dateFnsLocalizer } from 'react-big-calendar';
@@ -32,7 +33,7 @@ const BookingPage = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      const { data: barbersData } = await barbersService.fetchBarbers();
+      const { data: barbersData } = await barbersService.fetchActiveBarbers();
       if (barbersData) {
         setBarbers(barbersData);
       }
@@ -44,7 +45,7 @@ const BookingPage = () => {
   useEffect(() => {
     const loadSlots = async () => {
       if (selectedBarber || barbers.length > 0) {
-        const { data: bookedSlots } = await reservationsService.fetchReservations();
+        const { data: bookedSlots } = await reservationsService.fetchAllReservations();
         if (bookedSlots) {
           const allSlotsUpdated = updateAllSlotsFromReservations(bookedSlots, selectedBarber, barbers);
           setAllSlots(allSlotsUpdated);
@@ -69,7 +70,7 @@ const BookingPage = () => {
     setFormSuccess(false);
     
     try {
-      const { data: bookedSlots } = await reservationsService.fetchReservations(); 
+      const { data: bookedSlots } = await reservationsService.fetchAllReservations(); 
       if (bookedSlots != null) {
         const result = await reservationsService.createReservation(formData, selectedSlot, bookedSlots, barbers);
         if (result.success) {
@@ -82,7 +83,7 @@ const BookingPage = () => {
         }
       } 
     } catch {
-      setFormError(ErrorMessages.RESERVATION.CREATE_RESERVATION_FAILURE);
+      setFormError(ErrorMessages.RESERVATION.CREATE_FAILURE);
     } finally {
       setFormLoading(false);
     }
@@ -115,7 +116,7 @@ const BookingPage = () => {
 
         {showReservationForm && selectedSlot && (
           <BookingForm onSubmit={handleSubmitForm} onCancel={handleFormClose} isLoading={formLoading} 
-                       error={formError || undefined} success={formSuccess} />
+                       error={formError || undefined} success={formSuccess} selectedDate={selectedSlot.Start} selectedBarber={selectedBarber} />
         )}
       </div>
     </div>

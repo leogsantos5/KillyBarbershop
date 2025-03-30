@@ -7,7 +7,7 @@ import { sendConfirmationSMS } from '../services/twilioService';
 import { PAID_FEATURES } from '../utils/navigationPages';
 
 export const reservationsService = {
-  async fetchReservations() {
+  async fetchAllReservations() {
     try {
       const query = supabase
         .from('Reservations')
@@ -17,14 +17,37 @@ export const reservationsService = {
 
       const { data, error } = await query;
       
-      if (error) throw ErrorMessages.RESERVATION.FETCH_RESERVATIONS_FAILURE;
+      if (error) throw ErrorMessages.RESERVATION.FETCH_FAILURE;
       
       return { success: true, data: data as unknown as DbBookedSlot[] };
     } 
     catch {
       return { 
         success: false, 
-        error: new Error(ErrorMessages.RESERVATION.FETCH_RESERVATIONS_FAILURE) 
+        error: new Error(ErrorMessages.RESERVATION.FETCH_FAILURE) 
+      };
+    }
+  },
+
+  async fetchConfirmedReservations() {
+    try {
+      const query = supabase
+        .from('Reservations')
+        .select(`StartTime, EndTime, Status, 
+                 Users (Id, Name, Phone),
+                 Barbers (Id, Name, Phone)`)
+        .eq('Status', true);
+
+      const { data, error } = await query;
+      
+      if (error) throw ErrorMessages.RESERVATION.FETCH_FAILURE;
+      
+      return { success: true, data: data as unknown as DbBookedSlot[] };
+    } 
+    catch {
+      return { 
+        success: false, 
+        error: new Error(ErrorMessages.RESERVATION.FETCH_FAILURE) 
       };
     }
   },
@@ -39,7 +62,7 @@ export const reservationsService = {
       console.log(queryResult.count);
     }
 
-    if (queryResult.error) throw new Error(ErrorMessages.RESERVATION.DELETE_RESERVATIONS_FAILURE);
+    if (queryResult.error) throw new Error(ErrorMessages.RESERVATION.DELETE_FAILURE);
 
     return true;
   },
@@ -49,7 +72,7 @@ export const reservationsService = {
                                       .select('*')
                                       .eq('UserId', userId);
 
-    if (queryResult.error) throw new Error(ErrorMessages.RESERVATION.FETCH_RESERVATIONS_FAILURE);
+    if (queryResult.error) throw new Error(ErrorMessages.RESERVATION.FETCH_FAILURE);
 
     const allUserReservations = queryResult.data as unknown as DbBookedSlot[];
     if (allUserReservations === null || allUserReservations.length === 0)
@@ -97,7 +120,7 @@ export const reservationsService = {
                                                   StartTime: selectedSlot.Start.toISOString(), 
                                                   EndTime: selectedSlot.End.toISOString()}]);
                               
-      if (queryResult.error) throw new Error(ErrorMessages.RESERVATION.CREATE_RESERVATION_FAILURE);
+      if (queryResult.error) throw new Error(ErrorMessages.RESERVATION.CREATE_FAILURE);
       
       if (PAID_FEATURES.SEND_SMS) {
         const formattedStringDate = selectedSlot.Start.toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric',
@@ -110,8 +133,81 @@ export const reservationsService = {
       console.error('Error creating reservation:', error);
       return { 
         success: false, 
-        error: error instanceof Error ? error.message : ErrorMessages.RESERVATION.CREATE_RESERVATION_FAILURE
+        error: error instanceof Error ? error.message : ErrorMessages.RESERVATION.CREATE_FAILURE
       };
+    }
+  },
+
+  fetchBarberReservations: async (barberId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('Reservations')
+        .select(`
+          *,
+          Users (
+            Id,
+            Name,
+            Phone,
+            Status
+          )
+        `)
+        .eq('BarberId', barberId)
+        .order('StartTime', { ascending: true })
+
+      if (error) throw error
+
+      return {
+        success: true,
+        data: data as unknown as DbBookedSlot[]
+      }
+    } catch (error) {
+      console.error('Error fetching barber reservations:', error)
+      return {
+        success: false,
+        error: error as Error
+      }
+    }
+  },
+
+  confirmReservation: async (reservationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('Reservations')
+        .update({ Status: true })
+        .eq('Id', reservationId)
+
+      if (error) throw error
+
+      return {
+        success: true
+      }
+    } catch (error) {
+      console.error('Error confirming reservation:', error)
+      return {
+        success: false,
+        error: error as Error
+      }
+    }
+  },
+
+  deleteReservation: async (reservationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('Reservations')
+        .delete()
+        .eq('Id', reservationId)
+
+      if (error) throw error
+
+      return {
+        success: true
+      }
+    } catch (error) {
+      console.error('Error deleting reservation:', error)
+      return {
+        success: false,
+        error: error as Error
+      }
     }
   }
 };
