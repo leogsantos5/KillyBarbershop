@@ -18,12 +18,12 @@ export async function showDeleteConfirmation() {
 }
 
 export async function showReservationConfirmation(clientName: string, date: string, time: string) {
-  return showConfirmationDialog({title: 'Confirmar Marcação', html: `Tem certeza que deseja confirmar a marcação de:<br>
+  return showConfirmationDialog({title: 'Confirmar Marcação', html: `Tem a certeza que deseja confirmar a marcação de:<br>
                                 <strong>${clientName}</strong><br> para <strong>${date}</strong><br>às <strong>${time}</strong>?`, 
                                  confirmButtonText: 'Sim, confirmar!', cancelButtonText: 'Cancelar'});
 }
 
 export async function showStatusChangeConfirmation(action: string, name: string) {
-  return showConfirmationDialog({title: `Deseja ${action}?`, text: `Tem certeza que deseja ${action} ${name}?`, 
+  return showConfirmationDialog({title: `Deseja ${action}?`, text: `Tem a certeza que deseja ${action} ${name}?`, 
                                  confirmButtonText: `Sim, ${action}!`, cancelButtonText: 'Cancelar'});
 } 

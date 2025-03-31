@@ -55,8 +55,7 @@ export function BookingForm({onSubmit, onCancel, isLoading, error, success, sele
 
     const result = await Swal.fire({
       title: 'Confirmar Reserva',
-      html: `Tem certeza que deseja fazer uma reserva para:<br>
-             <strong>${formattedDate}</strong><br>
+      html: `Tem a certeza que deseja fazer uma reserva para:<br> <strong>${formattedDate}</strong><br>
              às <strong>${formattedTime}</strong>${barberText}?`,
       icon: 'question',
       showCancelButton: true,

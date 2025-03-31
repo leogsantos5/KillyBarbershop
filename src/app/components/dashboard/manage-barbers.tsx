@@ -132,26 +132,33 @@ export function ManageBarbers({ barbers, isLoading, onBarbersUpdate }: ManageBar
         ) : (
           <div className="space-y-4">
             {barbers.map((barber) => (
-              <div key={barber.Id} className={`flex items-center justify-between p-4 border rounded-lg shadow-sm ${barber.Status ? 'bg-white' : 'bg-gray-50'}`}>
-                <div>
+              <div key={barber.Id} className={`flex flex-col lg:flex-row lg:items-center justify-between p-4 border rounded-lg shadow-sm gap-4
+                  ${barber.Status ? 'bg-white' : 'bg-gray-50'}`}>
+                <div className="flex-1">
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold text-lg">{barber.Name}</h3>
                     {!barber.Status && (
-                      <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded">Inativo</span>
+                      <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded"> Inativo </span>
                     )}
                   </div>
                   <p className="text-sm text-gray-500">{barber.Phone}</p>
                 </div>
-                <div className="flex gap-2">
-                  <button onClick={() => handleToggleBarberStatus(barber)} disabled={isLoading} 
-                          className={`px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 ${
-                            barber.Status ? 'bg-gray-200 hover:bg-gray-300' : 'bg-blue-500 text-white hover:bg-blue-600'}`}>
-                    {barber.Status ? 'Desativar' : 'Ativar'}
-                  </button>
-                  <button onClick={() => handleDeleteBarber(barber.Id)} disabled={isLoading} 
-                          className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50">
-                    Eliminar
-                  </button>
+                <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8">
+                  <div className="flex gap-2 w-full lg:w-auto">
+                    <button
+                      onClick={() => handleToggleBarberStatus(barber)}
+                      disabled={isLoading}
+                      className={`flex-1 lg:flex-none px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 ${
+                        barber.Status ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-green-500 text-white hover:bg-green-600'}`}>
+                      {barber.Status ? 'Desativar' : 'Ativar'}
+                    </button>
+                    <button
+                      onClick={() => handleDeleteBarber(barber.Id)}
+                      disabled={isLoading}
+                      className="flex-1 lg:flex-none px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50">
+                      Eliminar
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

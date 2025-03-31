@@ -11,8 +11,10 @@ import { Toaster, toast } from 'react-hot-toast'
 import { ManageReservations } from '../components/dashboard/manage-reservations'
 import { ManageBarbers } from '../components/dashboard/manage-barbers'
 import { ManageUsers } from '../components/dashboard/manage-users'
+import { Sidebar } from '../components/dashboard/sidebar'
 import { TimePeriod, DrillDownState, ActiveTab } from '../types/dashboard'
 import { useRouter } from 'next/navigation'
+import { ErrorMessages } from '../utils/errorMessages'
 
 const tabs: { activeTab: ActiveTab; label: string }[] = [
   { activeTab: 'my-reservations', label: 'Gerir Marcações' },
@@ -35,8 +37,27 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalUsers, setTotalUsers] = useState(0)
   const [isOwner, setIsOwner] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const pageSize = 10
   const router = useRouter()
+
+  // Add periodic session check
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const checkSessionInterval = setInterval(async () => {
+      const response = await authService.checkSession();
+      debugger;
+      if (response.error) {
+        setIsAuthenticated(false);
+        setIsOwner(false);
+        setSelectedBarberId(null);
+        toast.error(ErrorMessages.AUTH.SESSION_EXPIRED);
+      }
+    }, 60000); // Check every minute
+
+    return () => clearInterval(checkSessionInterval);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -167,24 +188,33 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-100">
       <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
-      <div className="flex">
-        {/* Sidebar */}
-        <div className="w-64 min-h-screen bg-white shadow-md">
-          <div className="p-4">
-            <h2 className="text-xl font-bold mb-6">Painel de Controlo</h2>
-            <nav className="space-y-2">
-              {availableTabs.map(tab => (
-                <button key={tab.activeTab} onClick={() => setActiveTab(tab.activeTab)}
-                  className={`w-full p-2 text-left rounded ${activeTab === tab.activeTab ? 'bg-blue-100 text-blue-600' : ''}`}>
-                  {tab.label}
-                </button>
-              ))}
-            </nav>
-          </div>
-        </div>
+      
+      {/* Mobile Header */}
+      <div className="lg:hidden bg-white shadow-md p-4 flex justify-between items-center border-b-4 border-red-600">
+        <h2 className="text-xl font-bold text-left">KR<span className="text-red-600">&</span>XG</h2>
+        <button 
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="p-2 rounded-md hover:bg-gray-100"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+
+      <div className="flex h-screen">
+        <Sidebar 
+          isOpen={isSidebarOpen}
+          activeTab={activeTab}
+          availableTabs={availableTabs}
+          onTabChange={(tab) => {
+            setActiveTab(tab);
+            setIsSidebarOpen(false);
+          }}
+        />
 
         {/* Main Content */}
-        <div className="flex-1 p-8">
+        <div className="flex-1 p-4 lg:p-8 overflow-auto">
           {isLoading ? (
             <div className="flex items-center justify-center mb-20 min-h-[calc(100vh-4rem)]">
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-red-600 border-t-transparent"></div>
@@ -192,33 +222,42 @@ export default function Dashboard() {
           ) : (
             <>
               {activeTab === 'revenue' && (
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <StatisticsGraph reservations={isOwner ? reservations : reservations.filter(r => r.Barbers.Id === selectedBarberId)} 
-                                  timePeriod={timePeriod} drillDown={drillDown} onDrillDown={handleDrillDown} 
-                                  setTimePeriod={setTimePeriod} setDrillDown={setDrillDown} type="revenue" barbers={barbers} 
-                                  selectedBarberId={isOwner ? selectedBarberId : null} onBarberSelect={setSelectedBarberId} isOwner={isOwner} />
+                <div className="bg-white p-4 lg:p-6 rounded-lg shadow border-l-4 border-blue-600">
+                  <StatisticsGraph 
+                    reservations={isOwner ? reservations : reservations.filter(r => r.Barbers.Id === selectedBarberId)} 
+                    timePeriod={timePeriod} drillDown={drillDown} onDrillDown={handleDrillDown} 
+                    setTimePeriod={setTimePeriod} setDrillDown={setDrillDown} type="revenue" barbers={barbers} 
+                    selectedBarberId={isOwner ? selectedBarberId : null} onBarberSelect={setSelectedBarberId} isOwner={isOwner} />
                 </div>
               )}
 
               {activeTab === 'appointments' && (
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <StatisticsGraph reservations={isOwner ? reservations : reservations.filter(r => r.Barbers.Id === selectedBarberId)} 
-                                  timePeriod={timePeriod} drillDown={drillDown} onDrillDown={handleDrillDown} 
-                                  setTimePeriod={setTimePeriod} setDrillDown={setDrillDown} type="appointments" barbers={barbers} 
-                                  selectedBarberId={isOwner ? selectedBarberId : null} onBarberSelect={setSelectedBarberId} isOwner={isOwner} />
+                <div className="bg-white p-4 lg:p-6 rounded-lg shadow border-l-4 border-blue-600">
+                  <StatisticsGraph 
+                    reservations={isOwner ? reservations : reservations.filter(r => r.Barbers.Id === selectedBarberId)} 
+                    timePeriod={timePeriod} drillDown={drillDown} onDrillDown={handleDrillDown} 
+                    setTimePeriod={setTimePeriod} setDrillDown={setDrillDown} type="appointments" barbers={barbers} 
+                    selectedBarberId={isOwner ? selectedBarberId : null} onBarberSelect={setSelectedBarberId} isOwner={isOwner} />
                 </div>
               )}
 
               {isOwner && activeTab === 'users' && (
-                <ManageUsers users={users} reservations={reservations} isLoading={isLoading} currentPage={currentPage} totalUsers={totalUsers} pageSize={pageSize} onPageChange={handlePageChange} onUsersUpdate={fetchUsers}/>
+                <div className="bg-white p-4 lg:p-6 rounded-lg shadow border-l-4 border-blue-600">
+                  <ManageUsers users={users} reservations={reservations} isLoading={isLoading} currentPage={currentPage} 
+                            totalUsers={totalUsers} pageSize={pageSize} onPageChange={handlePageChange} onUsersUpdate={fetchUsers} />
+                </div>
               )}
 
               {isOwner && activeTab === 'barbers' && (
-                <ManageBarbers barbers={barbers} isLoading={isLoading} onBarbersUpdate={fetchAllBarbers}/>
+                <div className="bg-white p-4 lg:p-6 rounded-lg shadow border-l-4 border-blue-600">
+                  <ManageBarbers barbers={barbers} isLoading={isLoading} onBarbersUpdate={fetchAllBarbers} />
+                </div>
               )}
 
               {activeTab === 'my-reservations' && (
-                <ManageReservations isLoading={isLoading} currentBarberId={selectedBarberId || ''} />
+                <div className="bg-white p-4 lg:p-6 rounded-lg shadow border-l-4 border-blue-600">
+                  <ManageReservations isLoading={isLoading} currentBarberId={selectedBarberId || ''}/>
+                </div>
               )}
             </>
           )}

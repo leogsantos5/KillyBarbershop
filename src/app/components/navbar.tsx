@@ -1,10 +1,18 @@
 'use client';
+
 import { useState } from 'react';
 import Link from 'next/link';
 import { navigationPages } from '../utils/navigationPages';
+import { usePathname } from 'next/navigation'
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname()
+  const isDashboard = pathname.startsWith('/dashboard')
+
+  if (isDashboard) {
+    return null
+  }
 
   return (
     <nav className="bg-white dark:bg-gray-800 shadow-lg border-b-4 border-red-600 dark:border-red-800">

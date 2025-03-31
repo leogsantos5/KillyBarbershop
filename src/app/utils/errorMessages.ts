@@ -48,6 +48,7 @@ export const ErrorMessages = {
       INVALID_CREDENTIALS: 'Credenciais inválidas',
       BARBER_NOT_FOUND: 'Barbeiro não encontrado',
       OWNER_NOT_FOUND: 'Proprietário não encontrado',
-      INVALID_SESSION: 'Sessão inválida'
+      INVALID_SESSION: 'Sessão inválida',
+      SESSION_EXPIRED: 'Sessão expirada. Por favor insira as credenciais novamente.'
     }
   } as const;
