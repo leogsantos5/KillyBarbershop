@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Barber, DbBookedSlot } from '../../types/booking';
+import { DbBookedSlot } from '../../types/booking';
 import { reservationsService } from '../../supabase/reservationsService';
 import { toast } from 'react-hot-toast';
 import { showDeleteConfirmation, showReservationConfirmation } from '../confirmation-swal';
@@ -7,24 +7,18 @@ import { handleServiceCall } from '../../utils/serviceHandler';
 import { ErrorMessages } from '../../utils/errorMessages';
 import { filterActiveBarberReservations } from '../../utils/filterReservations';
 
-const OWNER_NAME = process.env.NEXT_PUBLIC_OWNER_NAME?.replace('_', ' ') || "Killy Ross";
+interface ManageReservationsProps { 
+  isLoading: boolean;
+  currentBarberId: string;
+}
 
-interface ManageReservationsProps { barbers: Barber[]; isLoading: boolean; }
-
-export function ManageReservations({ barbers, isLoading }: ManageReservationsProps) {
+export function ManageReservations({ isLoading, currentBarberId } : ManageReservationsProps) {
   const [ownerReservations, setOwnerReservations] = useState<DbBookedSlot[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   const fetchBarberReservations = useCallback(async () => {
     try {
-      const owner = barbers.find(barber => barber.Name === OWNER_NAME);
-      if (!owner && barbers.length > 0) {
-        toast.error(ErrorMessages.USER.OWNER_NOT_FOUND);
-        return;
-      }
-      if (!owner) return;
-      
-      const { success, data } = await reservationsService.fetchBarberReservations(owner.Id);
+      const { success, data } = await reservationsService.fetchBarberReservations(currentBarberId);
       if (success && data) {
         const filteredReservations = filterActiveBarberReservations(data, 14, searchTerm);
         setOwnerReservations(filteredReservations);
@@ -32,13 +26,13 @@ export function ManageReservations({ barbers, isLoading }: ManageReservationsPro
     } catch {
       toast.error(ErrorMessages.RESERVATION.FETCH_FAILURE);
     }
-  }, [barbers, searchTerm]);
+  }, [currentBarberId, searchTerm]);
 
   useEffect(() => {
-    if (barbers.length > 0) {
+    if (currentBarberId) {
       fetchBarberReservations();
     }
-  }, [barbers, searchTerm, fetchBarberReservations]);
+  }, [currentBarberId, searchTerm, fetchBarberReservations]);
 
   const handleConfirmReservation = async (reservationId: string) => {
     const reservation = ownerReservations.find(r => r.Id === reservationId);

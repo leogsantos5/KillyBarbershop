@@ -218,7 +218,7 @@ export default function Dashboard() {
               )}
 
               {activeTab === 'my-reservations' && (
-                <ManageReservations barbers={barbers} isLoading={isLoading} />
+                <ManageReservations isLoading={isLoading} currentBarberId={selectedBarberId || ''} />
               )}
             </>
           )}
