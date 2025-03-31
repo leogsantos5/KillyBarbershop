@@ -8,5 +8,3 @@ export const PAID_FEATURES = {
   SEND_SMS: false,
   VALIDATE_PHONE: false
 } as const;
-
-export const OWNER_NAME = "Killy Ross";

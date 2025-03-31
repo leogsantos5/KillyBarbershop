@@ -7,55 +7,55 @@ import { User } from '../types/booking';
 
 export const usersService = {
   async findUserByPhone(phone: string) : Promise<User | null> {
-    const formattedPhone = formatPhoneNumber(phone, 'PT');
-    if (!formattedPhone) {
-      throw new Error(ErrorMessages.FORM.INVALID_PHONE_FORMAT);
-    }
-     
-    const { data: user, error } = await supabase
-      .from('Users')
-      .select('*')
-      .eq('Phone', formattedPhone)
-      .maybeSingle();
+    try {
+      const formattedPhone = formatPhoneNumber(phone, 'PT');
+      if (!formattedPhone) {
+        throw new Error(ErrorMessages.FORM.INVALID_PHONE_FORMAT);
+      }
+       
+      const { data: user, error } = await supabase.from('Users').select('*').eq('Phone', formattedPhone).maybeSingle();
 
-    if (error) throw error;
-    return user;
+      if (error) throw error;
+      return user;
+    } catch (error) {
+      throw error instanceof Error ? error : new Error(ErrorMessages.USER.FIND_USER_BY_PHONE_FAILURE);
+    }
   },
 
   async createUser(name: string, phone: string) : Promise<User> {
-    
-    const formattedPhone = formatPhoneNumber(phone, 'PT');
-    if (!formattedPhone) {
-      throw new Error(ErrorMessages.FORM.INVALID_PHONE_FORMAT);
-    }
-
-    if (PAID_FEATURES.VALIDATE_PHONE) {
-      const isValidPhone = await validatePortuguesePhone(formattedPhone);
-      if (!isValidPhone) {
-        throw new Error(ErrorMessages.FORM.INVALID_PHONE);
+    try {
+      const formattedPhone = formatPhoneNumber(phone, 'PT');
+      if (!formattedPhone) {
+        throw new Error(ErrorMessages.FORM.INVALID_PHONE_FORMAT);
       }
-    }
 
-    const { data: newUser, error } = await supabase.from('Users')
-                                    .insert([{ Name: name, Phone: formattedPhone }])
-                                    .select('*').single();        
-
-    if (error) {
-      if (error.code === '23505') {
-        throw new Error(ErrorMessages.RESERVATION.DUPLICATE_PHONE);
+      if (PAID_FEATURES.VALIDATE_PHONE) {
+        const isValidPhone = await validatePortuguesePhone(formattedPhone);
+        if (!isValidPhone) {
+          throw new Error(ErrorMessages.FORM.INVALID_PHONE);
+        }
       }
-      throw error;
-    }
 
-    if (!newUser) throw new Error(ErrorMessages.RESERVATION.CREATE_USER_FAILURE);
-    return newUser;
+      const { data: newUser, error } = await supabase.from('Users').insert([{ Name: name, Phone: formattedPhone }]).select('*').single();        
+
+      if (error) {
+        if (error.code === '23505') {
+          throw new Error(ErrorMessages.RESERVATION.DUPLICATE_PHONE);
+        }
+        throw error;
+      }
+
+      if (!newUser) throw new Error(ErrorMessages.RESERVATION.CREATE_USER_FAILURE);
+      return newUser;
+    } catch (error) {
+      console.error('Error creating user:', error);
+      throw error instanceof Error ? error : new Error(ErrorMessages.RESERVATION.CREATE_USER_FAILURE);
+    }
   },
 
   async fetchAllUsers(page: number = 1, pageSize: number = 10, searchTerm: string = '') {
     try {
-      let query = supabase
-        .from('Users')
-        .select('*', { count: 'exact' });
+      let query = supabase.from('Users').select('*', { count: 'exact' });
 
       // Apply search filter if searchTerm exists
       if (searchTerm) {
@@ -69,40 +69,22 @@ export const usersService = {
 
       const { data, error, count } = await query;
 
-      if (error) throw ErrorMessages.USER.FETCH_FAILURE;
+      if (error) throw error;
       
-      return { 
-        success: true, 
-        data: data as User[],
-        total: count || 0,
-        page,
-        pageSize
-      };
-    } 
-    catch {
-      return { 
-        success: false, 
-        error: new Error(ErrorMessages.USER.FETCH_FAILURE) 
-      };
+      return { success: true, data: data as User[], total: count || 0, page, pageSize };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error : new Error(ErrorMessages.USER.FETCH_FAILURE)};
     }
   },
 
-  async toggleUserStatus(userId: string, newStatus: boolean) {
+  async toggleUserStatus(userId: string, currentStatus: boolean) {
     try {
-      const { error } = await supabase
-        .from('Users')
-        .update({ Status: newStatus })
-        .eq('Id', userId);
+      const { error } = await supabase.from('Users').update({ Status: !currentStatus }).eq('Id', userId);
 
-      if (error) throw ErrorMessages.USER.UPDATE_STATUS_FAILURE;
-      
+      if (error) throw error;
       return { success: true };
-    } 
-    catch {
-      return { 
-        success: false, 
-        error: new Error(ErrorMessages.USER.UPDATE_STATUS_FAILURE) 
-      };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error : new Error(ErrorMessages.USER.UPDATE_STATUS_FAILURE)};
     }
   }
 };

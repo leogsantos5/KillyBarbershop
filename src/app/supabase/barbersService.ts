@@ -1,103 +1,79 @@
 import supabase from "../services/supabaseClient";
-import { Barber } from "../types/booking";
 import { hashPassword } from "../utils/passwordUtils";
+import { ErrorMessages } from "../utils/errorMessages";
 
 export const barbersService = {
     async fetchAllBarbers() {
       try {
-        const { data, error } = await supabase
-          .from('Barbers')
-          .select('*');
-  
+        const { data, error } = await supabase.from('Barbers').select('*');
         if (error) throw error;
         return { success: true, data };
       } catch (error) {
-        console.error('Error fetching barbers:', error);
-        return { success: false, error };
+        return { success: false, error: error instanceof Error ? error : new Error(ErrorMessages.BARBER.FETCH_FAILURE)};
+      }
+    },
+
+    async fetchBarberById(barberId: string) {
+      try {
+        const { data, error } = await supabase.from('Barbers').select('*').eq('Id', barberId).single();
+        if (error) throw error;
+        return { success: true, data };
+      } catch (error) {
+        return { success: false, error: error instanceof Error ? error : new Error(ErrorMessages.BARBER.FETCH_FAILURE)};
       }
     },
 
     async fetchActiveBarbers() {
       try {
-        const { data, error } = await supabase
-          .from('Barbers')
-          .select('*')
-          .eq('Status', true); // only active barbers
-  
+        const { data, error } = await supabase.from('Barbers').select('*').eq('Status', true); // only active barbers
         if (error) throw error;
         return { success: true, data };
       } catch (error) {
-        console.error('Error fetching active barbers:', error);
-        return { success: false, error };
+        return { success: false, error: error instanceof Error ? error : new Error(ErrorMessages.BARBER.FETCH_FAILURE)};
       }
     },
 
     async fetchBarber(barberName: string) {
       try {
-        const { data, error } = await supabase
-          .from('Barbers')
-          .select('Id, Name, Password')
-          .eq('Name', barberName)
-          .single();
-  
+        const { data, error } = await supabase.from('Barbers').select('Id, Name, Password').eq('Name', barberName).single();
         if (error) throw error;
         return { success: true, data };
       } catch (error) {
-        console.error('Error fetching barber:', error);
-        return { success: false, error };
+        return { success: false, error: error instanceof Error ? error : new Error(ErrorMessages.BARBER.FETCH_FAILURE)};
       }
     },
 
-    async createBarber( barber: Barber ) {
+    async createBarber(name: string, password: string) {
       try {
-        const hashedPassword = await hashPassword(barber.Password);
-        const { data: newBarber, error } = await supabase
-          .from('Barbers')
-          .insert([{
-            Name: barber.Name,
-            Phone: barber.Phone,
-            Password: hashedPassword,
-            Status: true
-          }])
-          .select()
-          .single();
-
+        const hashedPassword = await hashPassword(password);
+        const { data, error } = await supabase.from('Barbers')
+                                .insert([{ Name: name, Password: hashedPassword, Status: true }])
+                                .select().single();
         if (error) throw error;
-        return { success: true, data: newBarber };
+        return { success: true, data };
       } catch (error) {
-        console.error('Error creating barber:', error);
-        return { success: false, error };
+        return { success: false, error: error instanceof Error ? error : new Error(ErrorMessages.BARBER.CREATE_FAILURE)};
       }
     },
 
     async deleteBarber(barberId: string) {
       try {
-        const { error } = await supabase
-          .from('Barbers')
-          .delete()
-          .eq('Id', barberId);
-
+        const { error } = await supabase.from('Barbers').delete().eq('Id', barberId);
         if (error) throw error;
         return { success: true };
       } catch (error) {
-        console.error('Error deleting barber:', error);
-        return { success: false, error };
+        return { success: false, error: error instanceof Error ? error : new Error(ErrorMessages.BARBER.DELETE_FAILURE)};
       }
     },
 
-    async toggleBarberStatus(barberId: string, status: boolean) {
+    async toggleBarberStatus(barberId: string, currentStatus: boolean) {
       try {
-        debugger;
-        const { error } = await supabase
-          .from('Barbers')
-          .update({ Status: status })
-          .eq('Id', barberId);
-
+        const { error } = await supabase.from('Barbers').update({ Status: !currentStatus }).eq('Id', barberId);
+        if (error) throw error;
         if (error) throw error;
         return { success: true };
       } catch (error) {
-        console.error('Error updating barber status:', error);
-        return { success: false, error };
+        return { success: false, error: error instanceof Error ? error : new Error(ErrorMessages.BARBER.UPDATE_STATUS_FAILURE)};
       }
     }
 };

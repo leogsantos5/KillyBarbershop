@@ -5,11 +5,6 @@ export interface Service {
   description: string;
 }
 
-export interface FormData {
-  Name: string;
-  Phone: string;
-} 
-
 export interface Barber {
   Id: string;
   Phone: string;
@@ -45,16 +40,7 @@ export interface BookingSlotVM {
   BarberPhone: string;
 }
 
-export interface SupabaseError {
-  message: string;
-  status: number;
-}
-
-export interface NumVerifyResponse {
-  valid: boolean;
-  number: string;
-  local_format: string;
-  international_format: string;
-  country_prefix: string;
-  carrier: string;
+export interface BookingFormData {
+  Name: string;
+  Phone: string;
 }

@@ -6,7 +6,7 @@ import { dateFnsLocalizer } from 'react-big-calendar';
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { pt } from 'date-fns/locale';
-import { Barber, BookingSlotVM, FormData } from '../types/booking';
+import { Barber, BookingSlotVM, BookingFormData } from '../types/booking';
 import { barbersService } from '../supabase/barbersService';
 import { reservationsService } from '../supabase/reservationsService';
 import { MobileBooking } from '../components/mobile-booking/mobile-booking';
@@ -62,7 +62,7 @@ const BookingPage = () => {
     }
   };
 
-  const handleSubmitForm = async (formData: FormData) => {
+  const handleSubmitForm = async (formData: BookingFormData) => {
     if (!selectedSlot) return;
     
     setFormLoading(true);
@@ -79,7 +79,7 @@ const BookingPage = () => {
           setFormSuccess(true);       
         } 
         else {
-          setFormError(result.error as string);
+          setFormError(result.error as unknown as string);
         }
       } 
     } catch {

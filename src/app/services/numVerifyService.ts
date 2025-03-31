@@ -1,4 +1,4 @@
-import { NumVerifyResponse } from "../types/booking";
+import { NumVerifyResponse } from "../types/other";
 
 const API_KEY = process.env.NEXT_PUBLIC_NUMVERIFY_API_KEY;
 const API_URL = 'https://apilayer.net/api/validate';
