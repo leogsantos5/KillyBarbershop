@@ -8,7 +8,7 @@ export function HeroSection() {
         <Image
           className="w-full h-full object-cover"
           src="/images/OutsideEntrance.jpg"
-          alt="Killy Ross & Xandy Gavira Barbershop"
+          alt="Killy Ross & Xandi Gavira Barbershop"
           width={1920}
           height={1080}
           priority
@@ -18,7 +18,7 @@ export function HeroSection() {
       <div className="relative max-w-7xl mx-auto py-24 px-4 sm:py-32 sm:px-6 lg:px-8">
         <h1 className="text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tight text-red mb-4">
           <span className="text-red-500">Killy Ross &</span>
-          <span className="block text-blue-500">Xandy Gavira</span>
+          <span className="block text-blue-500">Xandi Gavira</span>
         </h1>
         <p className="mt-6 text-2xl text-gray-300 max-w-3xl">
           Serviços de barbearia premium em Alfragide. Experimente a combinação perfeita entre estilo e experiência.

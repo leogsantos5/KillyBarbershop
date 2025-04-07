@@ -1,46 +1,42 @@
 import supabase from '../services/supabaseClient';
 import { ErrorMessages } from '../utils/errorMessages';
-import { DbBookedSlot, BookingSlotVM, Barber, BookingFormData } from '../types/booking';
+import { Reservation, BookingSlotVM, Barber, BookingFormData } from '../types/booking';
 import { usersService } from './usersService';
 import { calculateLeastOccupiedBarberForDay } from '../utils/calculateLeastOccupiedBarber';
 import { sendConfirmationSMS } from '../services/twilioService';
 import { PAID_FEATURES } from '../utils/navigationPages';
 
 export const reservationsService = {
+
   async fetchAllReservations() {
     try {
-      const query = supabase
-        .from('Reservations').select(`StartTime, EndTime, Status, Users (Id, Name, Phone), Barbers (Id, Name, Phone)`);
+      const queryResult = await supabase.from('Reservations').select(`Id, StartTime, EndTime, Status, 
+                                                                      Services (Name, Price, Duration, Description), 
+                                                                      Users (Id, Name, Phone), 
+                                                                      Barbers (Id, Name, Phone)`);
 
-      const { data, error } = await query;
-      
-      if (error) throw error;
-      
-      return { success: true, data: data as unknown as DbBookedSlot[] };
+      if (queryResult.error) throw queryResult.error;
+
+      return { success: true, data: queryResult.data as unknown as Reservation[]};
     } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error : new Error(ErrorMessages.RESERVATION.FETCH_FAILURE)
-      };
+      return { success: false, error: error instanceof Error ? error : new Error(ErrorMessages.RESERVATION.FETCH_FAILURE) };
     }
   },
 
   async fetchConfirmedReservations() {
     try {
-      const query = supabase
-        .from('Reservations').select(`StartTime, EndTime, Status, Users (Id, Name, Phone), Barbers (Id, Name, Phone)`)
-        .eq('Status', true);
+      const queryResult = await supabase.from('Reservations')
+                            .select(`Id, StartTime, EndTime, Status, 
+                                    Services (Name, Price, Duration, Description), 
+                                    Users (Id, Name, Phone), 
+                                    Barbers (Id, Name, Phone)`)
+                            .eq('Status', true);
 
-      const { data, error } = await query;
-      
-      if (error) throw error;
-      
-      return { success: true, data: data as unknown as DbBookedSlot[] };
+      if (queryResult.error) throw queryResult.error;
+
+      return { success: true, data: queryResult.data as unknown as Reservation[]} ;
     } catch (error) {
-      return { 
-        success: false, 
-        error: error instanceof Error ? error : new Error(ErrorMessages.RESERVATION.FETCH_FAILURE)
-      };
+      return { success: false, error: error instanceof Error ? error : new Error(ErrorMessages.RESERVATION.FETCH_FAILURE) };
     }
   },
 
@@ -52,7 +48,6 @@ export const reservationsService = {
       }
       else{ // deletes all past reservations for a specific user
         queryResult = await supabase.from('Reservations').delete({ count: 'exact' }).eq('UserId', userId).lt('StartTime', presentDay);
-        console.log(queryResult.count);
       }
 
       if (queryResult.error) throw queryResult.error;
@@ -63,15 +58,13 @@ export const reservationsService = {
     }
   },
 
-  async fecthExistingReservationForUser(userId: string, presentDay: string) : Promise<DbBookedSlot | null> {
+  async fecthExistingReservationForUser(userId: string, presentDay: string) : Promise<Reservation | null> {
     try {
-      const queryResult = await supabase.from('Reservations')
-                                        .select('*')
-                                        .eq('UserId', userId);
+      const queryResult = await supabase.from('Reservations').select(`*`).eq('UserId', userId);
 
       if (queryResult.error) throw queryResult.error;
 
-      const allUserReservations = queryResult.data as unknown as DbBookedSlot[];
+      const allUserReservations = queryResult.data as unknown as Reservation[];
       if (allUserReservations === null || allUserReservations.length === 0)
         return null;
 
@@ -92,10 +85,10 @@ export const reservationsService = {
     }
   },
 
-  async createReservation(formData: BookingFormData, selectedSlot: BookingSlotVM, bookedSlots: DbBookedSlot[], barbers: Barber[]) {
+  async createReservation(formData: BookingFormData, selectedSlot: BookingSlotVM, bookedSlots: Reservation[], barbers: Barber[]) {
     try {
       const existingUser = await usersService.findUserByPhone(formData.Phone);
-
+      
       let userId: string;
       if (existingUser == null) {
         const newUser = await usersService.createUser(formData.Name, formData.Phone);
@@ -116,8 +109,8 @@ export const reservationsService = {
       }
 
       const queryResult = await supabase.from('Reservations')
-                                        .insert([{UserId: userId, BarberId: barberId, Status: false, 
-                                                  StartTime: selectedSlot.Start.toISOString(), 
+                                        .insert([{UserId: userId, BarberId: barberId, ServiceId: formData.ServiceId, 
+                                                  Status: false, StartTime: selectedSlot.Start.toISOString(), 
                                                   EndTime: selectedSlot.End.toISOString()}]);
                               
       if (queryResult.error) throw queryResult.error;
@@ -139,18 +132,13 @@ export const reservationsService = {
 
   fetchBarberReservations: async (barberId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('Reservations').select(`*, Users (Id, Name, Phone, Status)`)
-        .eq('BarberId', barberId).order('StartTime', { ascending: true })
+      const queryResult = await supabase.from('Reservations').select(`*, Users (Id, Name, Phone, Status),
+                                                                      Services (Name, Price, Duration, Description),
+                                                                      Barbers (Id, Name, Phone)`)
+                                        .eq('BarberId', barberId).order('StartTime', { ascending: true });                 
 
-      if (error) throw error;
-
-      return {
-        success: true,
-        data: data as unknown as DbBookedSlot[]
-      }
+      return { success: true, data: queryResult.data as unknown as Reservation[]};
     } catch (error) {
-      console.error('Error fetching barber reservations:', error);
       return {
         success: false,
         error: error instanceof Error ? error : new Error(ErrorMessages.RESERVATION.FETCH_FAILURE)
@@ -160,16 +148,9 @@ export const reservationsService = {
 
   confirmReservation: async (reservationId: string) => {
     try {
-      const { error } = await supabase
-        .from('Reservations')
-        .update({ Status: true })
-        .eq('Id', reservationId)
+      await supabase.from('Reservations').update({ Status: true }).eq('Id', reservationId);
 
-      if (error) throw error;
-
-      return {
-        success: true
-      }
+      return { success: true };
     } catch (error) {
       return {
         success: false,
@@ -180,14 +161,9 @@ export const reservationsService = {
 
   deleteReservation: async (reservationId: string) => {
     try {
-      const { error } = await supabase
-        .from('Reservations').delete().eq('Id', reservationId)
+      await supabase.from('Reservations').delete().eq('Id', reservationId);
 
-      if (error) throw error;
-
-      return {
-        success: true
-      }
+      return { success: true };
     } catch (error) {
       return {
         success: false,

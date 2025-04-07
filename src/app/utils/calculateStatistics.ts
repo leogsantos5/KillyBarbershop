@@ -1,4 +1,4 @@
-import { DbBookedSlot } from '../types/booking'
+import { Reservation } from '../types/booking'
 import { TimePeriod, DrillDownState, ActiveTab, StatisticsData } from '../types/dashboard'
 
 const PRICE_PER_APPOINTMENT = 12;
@@ -22,7 +22,7 @@ const getStartDate = (period: TimePeriod): Date => {
   return startDate
 }
 
-const calculatePeriodData = (reservations: DbBookedSlot[], periodValues: number[], periodFilter: (res: DbBookedSlot, value: number) => boolean, 
+const calculatePeriodData = (reservations: Reservation[], periodValues: number[], periodFilter: (res: Reservation, value: number) => boolean, 
                              labelFn: (value: number) => string, type: ActiveTab): StatisticsData => {
     const data = periodValues.map(value => {
     const periodReservations = reservations.filter(res => periodFilter(res, value));
@@ -32,7 +32,7 @@ const calculatePeriodData = (reservations: DbBookedSlot[], periodValues: number[
   return { data, labels };
 };
 
-export const calculateAppointments = (reservations: DbBookedSlot[], period: TimePeriod): number => {
+export const calculateAppointments = (reservations: Reservation[], period: TimePeriod): number => {
   const startDate = getStartDate(period)
   return reservations.filter(res => {
     const resDate = new Date(res.StartTime)
@@ -40,16 +40,15 @@ export const calculateAppointments = (reservations: DbBookedSlot[], period: Time
   }).length
 }
 
-export const calculateRevenue = (reservations: DbBookedSlot[], period: TimePeriod): number => {
+export const calculateRevenue = (reservations: Reservation[], period: TimePeriod): number => {
   const appointments = calculateAppointments(reservations, period)
   return appointments * PRICE_PER_APPOINTMENT
 }
 
-export function calculateStatistics(reservations: DbBookedSlot[], timePeriod: TimePeriod, 
+export function calculateStatistics(reservations: Reservation[], timePeriod: TimePeriod, 
                                     drillDown: DrillDownState, type: ActiveTab): StatisticsData {
   const now = new Date();
   const currentYear = now.getFullYear();
-
   if (timePeriod === 'yearly') {
     // For yearly view, show only 2025 as a single bar
     const yearReservations = reservations.filter(res => 

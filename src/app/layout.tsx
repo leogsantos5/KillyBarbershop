@@ -6,7 +6,7 @@ import { Navbar } from './components/navbar';
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: "Killy Ross & Xandy Gavira",
+  title: "Killy Ross & Xandi Gavira",
   description: "Barbearia Premium em Alfragide",
   icons: {
     icon: '/images/barberLogo.png',

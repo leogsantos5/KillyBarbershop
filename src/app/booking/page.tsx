@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { dateFnsLocalizer } from 'react-big-calendar';
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -31,30 +31,32 @@ const BookingPage = () => {
   const [formSuccess, setFormSuccess] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
+  const loadBarbers = async () => {
+    const { data: barbersData } = await barbersService.fetchActiveBarbers();
+    if (barbersData) {
+      setBarbers(barbersData);
+    }
+    setIsLoading(false);
+  };
+
   useEffect(() => {
-    const loadData = async () => {
-      const { data: barbersData } = await barbersService.fetchActiveBarbers();
-      if (barbersData) {
-        setBarbers(barbersData);
-      }
-      setIsLoading(false);
-    };
-    loadData();
+    loadBarbers();
   }, []);
 
-  useEffect(() => {
-    const loadSlots = async () => {
-      if (selectedBarber || barbers.length > 0) {
-        const { data: bookedSlots } = await reservationsService.fetchAllReservations();
-        if (bookedSlots) {
-          const allSlotsUpdated = updateAllSlotsFromReservations(bookedSlots, selectedBarber, barbers);
-          setAllSlots(allSlotsUpdated);
-        }
+  const loadSlots = useCallback(async () => {
+    if (selectedBarber || barbers.length > 0) {
+      const { data: bookedSlots } = await reservationsService.fetchAllReservations();
+      if (bookedSlots) {
+        const allSlotsUpdated = updateAllSlotsFromReservations(bookedSlots, selectedBarber, barbers);
+        setAllSlots(allSlotsUpdated);
       }
-    };
-    loadSlots();
-  }, [selectedBarber, barbers]);
+    }
+  }, [selectedBarber, barbers]); 
 
+  useEffect(() => {
+    loadSlots();
+  }, [loadSlots]);
+  
   const handleSelectSlotEvent = (event: BookingSlotVM) => {
     if (event.Status === undefined) {
       setSelectedSlot(event);
@@ -79,11 +81,11 @@ const BookingPage = () => {
           setFormSuccess(true);       
         } 
         else {
-          setFormError(result.error as unknown as string);
+          setFormError(result.error?.message || ErrorMessages.RESERVATION.CREATE_FAILURE);
         }
       } 
-    } catch {
-      setFormError(ErrorMessages.RESERVATION.CREATE_FAILURE);
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : ErrorMessages.RESERVATION.CREATE_FAILURE);
     } finally {
       setFormLoading(false);
     }
@@ -116,7 +118,8 @@ const BookingPage = () => {
 
         {showReservationForm && selectedSlot && (
           <BookingForm onSubmit={handleSubmitForm} onCancel={handleFormClose} isLoading={formLoading} 
-                       error={formError || undefined} success={formSuccess} selectedDate={selectedSlot.Start} selectedBarber={selectedBarber} />
+                       error={formError || undefined} success={formSuccess} 
+                       selectedDate={selectedSlot.Start} selectedBarber={selectedBarber} />
         )}
       </div>
     </div>

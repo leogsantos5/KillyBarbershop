@@ -1,7 +1,7 @@
-import { Barber, DbBookedSlot } from "../types/booking";
+import { Barber, Reservation } from "../types/booking";
 
 export function calculateLeastOccupiedBarberForDay(reservationDay: Date, availableBarbers: Barber[], 
-                                                   allBookedSlots: DbBookedSlot[]): string {
+                                                   allBookedSlots: Reservation[]): string {
     const barberAppearances: Record<string, number> = {}; 
 
     // Filter booked slots for the given day

@@ -1,10 +1,3 @@
-export interface Service {
-  name: string;
-  price: number;
-  duration: string;
-  description: string;
-}
-
 export interface Barber {
   Id: string;
   Phone: string;
@@ -13,18 +6,27 @@ export interface Barber {
   Status: boolean;
 }
 
-export type User = {
+export interface User {
   Id: string;
   Name: string;
   Phone: string;
   Status: boolean;
 };
 
-export interface DbBookedSlot {
+export interface Service {
+  Id: string;
+  Name: string;
+  Price: number;
+  Duration: string;
+  Description: string;
+}
+
+export interface Reservation {
   Id: string;
   StartTime: string;
   EndTime: string;
   Status: boolean;
+  Services: Service; // It's just one Service object
   Users: User; // It's just one User object
   Barbers: Barber; // It's just one Barber object
 }
@@ -33,6 +35,10 @@ export interface BookingSlotVM {
   Start: Date;
   End: Date;
   Status?: boolean;
+  ServiceId: string;
+  ServiceName: string;
+  ServicePrice: number;
+  ServiceDuration: string;
   UserName: string;
   UserPhone: string;
   BarberId: string;
@@ -43,4 +49,5 @@ export interface BookingSlotVM {
 export interface BookingFormData {
   Name: string;
   Phone: string;
+  ServiceId: string;
 }

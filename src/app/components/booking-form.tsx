@@ -2,11 +2,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { navigationPages } from '../utils/navigationPages';
-import Swal from 'sweetalert2';
-import { Barber } from '../types/booking';
+import { Barber, Service } from '../types/booking';
+import { servicesService } from '../supabase/servicesService';
+import { showClientReservationConfirmation as showClientReservationConfirmation } from './confirmation-swal';
+import { ErrorMessages } from '../utils/errorMessages';
 
 interface BookingFormProps {
-  onSubmit: (formData: { Name: string; Phone: string }) => void;
+  onSubmit: (formData: { Name: string; Phone: string; ServiceId: string }) => void;
   onCancel: () => void;
   isLoading: boolean;
   error?: string;
@@ -16,9 +18,21 @@ interface BookingFormProps {
 }
 
 export function BookingForm({onSubmit, onCancel, isLoading, error, success, selectedDate, selectedBarber}: BookingFormProps) {
-  const [formData, setFormData] = useState({Name: '', Phone: ''});
+  const [formData, setFormData] = useState({Name: '', Phone: '', ServiceId: ''});
+  const [services, setServices] = useState<Service[]>([]);
   const [isClosing, setIsClosing] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    const loadServices = async () => {
+      const { data: servicesData } = await servicesService.fetchAllServices();
+      if (servicesData) {
+        setServices(servicesData);
+      }
+    };
+    loadServices();
+  }, []);
 
   useEffect(() => {
     if (success) {
@@ -41,6 +55,14 @@ export function BookingForm({onSubmit, onCancel, isLoading, error, success, sele
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!formData.ServiceId) {
+      setFormError(ErrorMessages.FORM.REQUIRED_SERVICE);
+      return;
+    }
+
+    const selectedService = services.find(s => s.Id === formData.ServiceId);
+    if (!selectedService) return;
+
     const formattedDate = selectedDate.toLocaleDateString('pt-PT', {
       weekday: 'long',
       month: 'long',
@@ -51,20 +73,8 @@ export function BookingForm({onSubmit, onCancel, isLoading, error, success, sele
       minute: '2-digit'
     });
 
-    const barberText = selectedBarber ? ` com ${selectedBarber.Name}` : '';
-
-    const result = await Swal.fire({
-      title: 'Confirmar Reserva',
-      html: `Tem a certeza que deseja fazer uma reserva para:<br> <strong>${formattedDate}</strong><br>
-             às <strong>${formattedTime}</strong>${barberText}?`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Sim, reservar!',
-      cancelButtonText: 'Cancelar',
-      width: '400px'
-    });
+    const result = await showClientReservationConfirmation(selectedService.Name, formattedDate, formattedTime,
+                                                     selectedService.Price, selectedBarber?.Name);
 
     if (result.isConfirmed) {
       onSubmit(formData);
@@ -81,9 +91,9 @@ export function BookingForm({onSubmit, onCancel, isLoading, error, success, sele
       >
         <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Nova Reserva</h3>
 
-        {error && (
+        {(error || formError) && (
           <div className="mb-4 p-3 text-red-700 bg-red-100 rounded-md text-sm">
-            {error}
+            {error || formError}
           </div>
         )}
 
@@ -124,16 +134,29 @@ export function BookingForm({onSubmit, onCancel, isLoading, error, success, sele
               </div>
             </div>
 
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Serviço</label>
+              <select
+                required
+                className="mt-1 block w-full rounded-md border border-gray-300 dark:border-gray-600 
+                bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2"
+                value={formData.ServiceId}
+                onChange={(e) => setFormData((prev) => ({ ...prev, ServiceId: e.target.value }))}>
+                <option value="" disabled>Selecione um serviço</option>
+                {services.map((service) => (
+                  <option key={service.Id} value={service.Id} title={service.Description}>
+                    {service.Name} - {service.Price}€ ({service.Duration} mins)
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div className="flex gap-4 mt-6">
-              <button
-                type="button"
-                onClick={onCancel}
+              <button type="button" onClick={onCancel}
                 className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
                 Cancelar
               </button>
-              <button
-                type="submit"
-                disabled={isLoading}
+              <button type="submit" disabled={isLoading}
                 className="flex-1 px-4 py-2 text-white bg-green-600 rounded-md hover:bg-green-700 disabled:opacity-50">
                 {isLoading ? 'A Processar...' : 'Reservar'}
               </button>

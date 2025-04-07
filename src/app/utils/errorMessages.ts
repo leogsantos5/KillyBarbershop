@@ -10,6 +10,7 @@ export const ErrorMessages = {
       CONFIRM_FAILURE: 'Ocorreu um erro ao confirmar a reserva.',
       DELETE_SUCCESS: 'Reserva eliminada com sucesso!',
       CONFIRM_SUCCESS: 'Reserva confirmada com sucesso!',
+      CONFIRM_BARBER_SUCCESS: 'Marcação confirmada com sucesso!',
     },
     BARBER: {
       CREATE_FAILURE: 'Não foi possível adicionar o barbeiro.',
@@ -33,6 +34,7 @@ export const ErrorMessages = {
     FORM: {
       REQUIRED_NAME: 'Nome é obrigatório',
       REQUIRED_PHONE: 'Número de telemóvel é obrigatório',
+      REQUIRED_SERVICE: 'Tipo de serviço é obrigatório',
       INVALID_PHONE_FORMAT: 'Formato de número de telemóvel inválido',
       INVALID_PHONE: 'Número de telemóvel não existe',
       COUNTRY_CODE_NOT_SUPPORTED: 'País não suportado',
@@ -50,5 +52,11 @@ export const ErrorMessages = {
       OWNER_NOT_FOUND: 'Proprietário não encontrado',
       INVALID_SESSION: 'Sessão inválida',
       SESSION_EXPIRED: 'Sessão expirada. Por favor insira as credenciais novamente.'
+    },
+    SERVICE: {
+      FETCH_FAILURE: "Não foi possível carregar os serviços de barbeiro",
+      CREATE_FAILURE: "Não foi possível criar o serviço de barbeiro",
+      UPDATE_FAILURE: "Não foi possível atualizar o serviço de barbeiro",
+      DELETE_FAILURE: "Não foi possível eliminar o serviço de barbeiro"
     }
   } as const;

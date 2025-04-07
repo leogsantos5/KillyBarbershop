@@ -5,7 +5,7 @@ import { barbersService } from '../supabase/barbersService'
 import { reservationsService } from '../supabase/reservationsService'
 import { usersService } from '../supabase/usersService'
 import { authService } from '../supabase/authService'
-import { Barber, DbBookedSlot } from '../types/booking'
+import { Barber, Reservation } from '../types/booking'
 import StatisticsGraph from '../components/dashboard/statistics-graph'
 import { Toaster, toast } from 'react-hot-toast'
 import { ManageReservations } from '../components/dashboard/manage-reservations'
@@ -30,7 +30,7 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('my-reservations')
   const [barbers, setBarbers] = useState<Barber[]>([])
   const [users, setUsers] = useState<{ Id: string; Name: string; Phone: string; Status: boolean }[]>([])
-  const [reservations, setReservations] = useState<DbBookedSlot[]>([])
+  const [reservations, setReservations] = useState<Reservation[]>([])
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('yearly')
   const [drillDown, setDrillDown] = useState<DrillDownState>({})
   const [selectedBarberId, setSelectedBarberId] = useState<string | null>(null)
@@ -47,7 +47,6 @@ export default function Dashboard() {
 
     const checkSessionInterval = setInterval(async () => {
       const response = await authService.checkSession();
-      debugger;
       if (response.error) {
         setIsAuthenticated(false);
         setIsOwner(false);
@@ -112,9 +111,20 @@ export default function Dashboard() {
     setIsLoading(false)
   }, [currentPage, pageSize])
 
+  const fetchAllReservations = async () => {
+    const { success, data } = await reservationsService.fetchAllReservations()
+    if (success && data) {
+      setReservations(data)
+    } 
+  }
+
+  const getConfirmedReservations = () => {
+    return reservations.filter(reservation => reservation.Status)
+  }
+
   useEffect(() => {
     fetchAllBarbers()
-    fetchReservations()
+    fetchAllReservations()
     fetchUsers()
     // Scroll down a bit to hide header and navbar
     window.scrollTo(0, 90)
@@ -132,13 +142,6 @@ export default function Dashboard() {
       setBarbers(data)
     } 
     setIsLoading(false)
-  }
-
-  const fetchReservations = async () => {
-    const { success, data } = await reservationsService.fetchConfirmedReservations()
-    if (success && data) {
-      setReservations(data)
-    } 
   }
 
   const handleDrillDown = (newState: DrillDownState) => {
@@ -186,33 +189,25 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <Toaster position="top-right" toastOptions={{ duration: 4000 }} />
       
       {/* Mobile Header */}
-      <div className="lg:hidden bg-white shadow-md p-4 flex justify-between items-center border-b-4 border-red-600">
-        <h2 className="text-xl font-bold text-left">KR<span className="text-red-600">&</span>XG</h2>
+      <div className="lg:hidden bg-white dark:bg-gray-800 shadow-md p-4 flex justify-between items-center border-b-4 border-red-600">
+        <h2 className="text-xl font-bold text-left text-gray-900 dark:text-white">KR<span className="text-red-600">&</span>XG</h2>
         <button 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="p-2 rounded-md hover:bg-gray-100"
+          className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-6 h-6 text-gray-900 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
       </div>
 
       <div className="flex h-screen">
-        <Sidebar 
-          isOpen={isSidebarOpen}
-          activeTab={activeTab}
-          availableTabs={availableTabs}
-          onTabChange={(tab) => {
-            setActiveTab(tab);
-            setIsSidebarOpen(false);
-          }}
-        />
-
+      <Sidebar isOpen={isSidebarOpen} activeTab={activeTab} availableTabs={availableTabs}
+          onTabChange={(tab) => { setActiveTab(tab); setIsSidebarOpen(false); }} />
         {/* Main Content */}
         <div className="flex-1 p-4 lg:p-8 overflow-auto">
           {isLoading ? (
@@ -222,40 +217,38 @@ export default function Dashboard() {
           ) : (
             <>
               {activeTab === 'revenue' && (
-                <div className="bg-white p-4 lg:p-6 rounded-lg shadow border-l-4 border-blue-600">
+                <div className="bg-white dark:bg-gray-800 p-4 lg:p-6 rounded-lg shadow border-l-4 border-blue-600">
                   <StatisticsGraph 
-                    reservations={isOwner ? reservations : reservations.filter(r => r.Barbers.Id === selectedBarberId)} 
-                    timePeriod={timePeriod} drillDown={drillDown} onDrillDown={handleDrillDown} 
+                    reservations={reservations} timePeriod={timePeriod} drillDown={drillDown} onDrillDown={handleDrillDown} 
                     setTimePeriod={setTimePeriod} setDrillDown={setDrillDown} type="revenue" barbers={barbers} 
-                    selectedBarberId={isOwner ? selectedBarberId : null} onBarberSelect={setSelectedBarberId} isOwner={isOwner} />
+                    selectedBarberId={selectedBarberId} onBarberSelect={setSelectedBarberId} isOwner={isOwner} />
                 </div>
               )}
 
               {activeTab === 'appointments' && (
-                <div className="bg-white p-4 lg:p-6 rounded-lg shadow border-l-4 border-blue-600">
+                <div className="bg-white dark:bg-gray-800 p-4 lg:p-6 rounded-lg shadow border-l-4 border-blue-600">
                   <StatisticsGraph 
-                    reservations={isOwner ? reservations : reservations.filter(r => r.Barbers.Id === selectedBarberId)} 
-                    timePeriod={timePeriod} drillDown={drillDown} onDrillDown={handleDrillDown} 
+                    reservations={reservations} timePeriod={timePeriod} drillDown={drillDown} onDrillDown={handleDrillDown} 
                     setTimePeriod={setTimePeriod} setDrillDown={setDrillDown} type="appointments" barbers={barbers} 
-                    selectedBarberId={isOwner ? selectedBarberId : null} onBarberSelect={setSelectedBarberId} isOwner={isOwner} />
+                    selectedBarberId={selectedBarberId} onBarberSelect={setSelectedBarberId} isOwner={isOwner} />
                 </div>
               )}
 
               {isOwner && activeTab === 'users' && (
-                <div className="bg-white p-4 lg:p-6 rounded-lg shadow border-l-4 border-blue-600">
-                  <ManageUsers users={users} reservations={reservations} isLoading={isLoading} currentPage={currentPage} 
+                <div className="bg-white dark:bg-gray-800 p-4 lg:p-6 rounded-lg shadow border-l-4 border-blue-600">
+                  <ManageUsers users={users} reservations={getConfirmedReservations()} isLoading={isLoading} currentPage={currentPage} 
                             totalUsers={totalUsers} pageSize={pageSize} onPageChange={handlePageChange} onUsersUpdate={fetchUsers} />
                 </div>
               )}
 
               {isOwner && activeTab === 'barbers' && (
-                <div className="bg-white p-4 lg:p-6 rounded-lg shadow border-l-4 border-blue-600">
+                <div className="bg-white dark:bg-gray-800 p-4 lg:p-6 rounded-lg shadow border-l-4 border-blue-600">
                   <ManageBarbers barbers={barbers} isLoading={isLoading} onBarbersUpdate={fetchAllBarbers} />
                 </div>
               )}
 
               {activeTab === 'my-reservations' && (
-                <div className="bg-white p-4 lg:p-6 rounded-lg shadow border-l-4 border-blue-600">
+                <div className="bg-white dark:bg-gray-800 p-4 lg:p-6 rounded-lg shadow border-l-4 border-blue-600">
                   <ManageReservations isLoading={isLoading} currentBarberId={selectedBarberId || ''}/>
                 </div>
               )}

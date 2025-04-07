@@ -53,7 +53,7 @@ export function GallerySection() {
 
         <div className="mt-16 text-center">
           <p className="text-2xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            Experimente a combinação perfeita entre barbearia tradicional e estilo moderno na Killy Ross & Xandy Gavira. Onde cada corte conta uma história.
+            Experimente a combinação perfeita entre barbearia tradicional e estilo moderno na Killy Ross & Xandi Gavira. Onde cada corte conta uma história.
           </p>
           <div className="flex gap-4 justify-center mt-8">
             <Link

@@ -53,32 +53,37 @@ export function ManageBarbers({ barbers, isLoading, onBarbersUpdate }: ManageBar
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-6">Gerir Barbeiros</h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Gerir Barbeiros</h2>
       
       {/* Add Barber Form */}
-      <div className="bg-white p-6 rounded-lg shadow mb-8">
-        <h2 className="text-xl font-semibold mb-4">Adicionar Novo Barbeiro</h2>
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow mb-8">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Adicionar Novo Barbeiro</h2>
         <form onSubmit={handleAddBarber} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome</label>
               <input type="text" value={newBarber.Name} onChange={(e) => setNewBarber({ ...newBarber, Name: e.target.value })} 
-                     placeholder="Nome do barbeiro" required className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                     placeholder="Nome do barbeiro" required 
+                     className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500
+                              dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Telemóvel</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Telemóvel</label>
               <input type="tel" value={newBarber.Phone} onChange={(e) => setNewBarber({ ...newBarber, Phone: e.target.value })} 
-                     placeholder="Número de telemóvel" required className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                     placeholder="Número de telemóvel" required 
+                     className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500
+                              dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" />
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password Inicial</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password Inicial</label>
               <div className="relative">
                 <input type={showPassword ? "text" : "password"} value={newBarber.Password} 
                        onChange={(e) => setNewBarber({ ...newBarber, Password: e.target.value })} 
                        placeholder="Definir password inicial" required 
-                       className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                       className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500
+                                dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} 
                         className="absolute inset-y-0 right-0 flex items-center pr-3">
                   {showPassword ? (
@@ -95,11 +100,13 @@ export function ManageBarbers({ barbers, isLoading, onBarbersUpdate }: ManageBar
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar Password</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirmar Password</label>
               <div className="relative">
                 <input type={showConfirmPassword ? "text" : "password"} value={confirmPassword} 
                        onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirmar password inicial" 
-                       required className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                       required 
+                       className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500
+                                dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400" />
                 <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} 
                         className="absolute inset-y-0 right-0 flex items-center pr-3">
                   {showConfirmPassword ? (
@@ -123,25 +130,25 @@ export function ManageBarbers({ barbers, isLoading, onBarbersUpdate }: ManageBar
       </div>
 
       {/* Barbers List */}
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-semibold mb-4">Barbeiros Atuais</h2>
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+        <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Barbeiros Atuais</h2>
         {isLoading ? (
-          <div className="text-center py-4">A carregar...</div>
+          <div className="text-center py-4 text-gray-900 dark:text-white">A carregar...</div>
         ) : barbers.length === 0 ? (
-          <div className="text-center py-4 text-gray-500">Nenhum barbeiro encontrado</div>
+          <div className="text-center py-4 text-gray-500 dark:text-gray-400">Nenhum barbeiro encontrado</div>
         ) : (
           <div className="space-y-4">
             {barbers.map((barber) => (
               <div key={barber.Id} className={`flex flex-col lg:flex-row lg:items-center justify-between p-4 border rounded-lg shadow-sm gap-4
-                  ${barber.Status ? 'bg-white' : 'bg-gray-50'}`}>
+                  ${barber.Status ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700/50'} dark:border-gray-700`}>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-lg">{barber.Name}</h3>
+                    <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{barber.Name}</h3>
                     {!barber.Status && (
-                      <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded"> Inativo </span>
+                      <span className="px-2 py-1 text-xs bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 rounded"> Inativo </span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-500">{barber.Phone}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{barber.Phone}</p>
                 </div>
                 <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-8">
                   <div className="flex gap-2 w-full lg:w-auto">

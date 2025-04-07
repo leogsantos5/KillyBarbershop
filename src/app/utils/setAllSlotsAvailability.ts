@@ -1,6 +1,6 @@
-import { Barber, BookingSlotVM, DbBookedSlot } from "../types/booking";
+import { Barber, BookingSlotVM, Reservation } from "../types/booking";
 
-export function updateAllSlotsAvailability(allSlots: BookingSlotVM[], bookingsBySlot: Map<number, DbBookedSlot[]>,
+export function updateAllSlotsAvailability(allSlots: BookingSlotVM[], bookingsBySlot: Map<number, Reservation[]>,
                                            allBarbers: Barber[], selectedBarber?: Barber | null): BookingSlotVM[] {
 
     // This function updates the status of each slot based on the availability of barbers
