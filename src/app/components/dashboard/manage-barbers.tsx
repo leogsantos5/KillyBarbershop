@@ -2,13 +2,17 @@ import { useState } from 'react';
 import { Barber } from '../../types/booking';
 import { barbersService } from '../../supabase/barbersService';
 import { toast } from 'react-hot-toast';
-import { showDeleteConfirmation, showStatusChangeConfirmation } from '../confirmation-swal';
+import { showDeleteConfirmation, showStatusChangeConfirmation, showAddBarberConfirmation } from '../confirmation-swal';
 import { handleServiceCall } from '../../utils/serviceHandler';
 import { ErrorMessages } from '../../utils/errorMessages';
+import { checkTokenRole, Role } from '@/app/utils/checkTokenRole';
+import { useRouter } from 'next/navigation';
 
 interface ManageBarbersProps { barbers: Barber[]; isLoading: boolean; onBarbersUpdate: () => Promise<void>; }
 
 export function ManageBarbers({ barbers, isLoading, onBarbersUpdate }: ManageBarbersProps) {
+  const router = useRouter();
+  
   const initialBarberState: Barber = { Id: '', Name: '', Phone: '', Password: '', Status: false };
   const [newBarber, setNewBarber] = useState<Barber>(initialBarberState);
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -21,33 +25,69 @@ export function ManageBarbers({ barbers, isLoading, onBarbersUpdate }: ManageBar
       toast.error(ErrorMessages.FORM.PASSWORD_NOT_MATCH);
       return;
     }
-    
-    await handleServiceCall(
-      () => barbersService.createBarber(newBarber.Name, newBarber.Password),
-      ErrorMessages.BARBER.CREATE_SUCCESS, ErrorMessages.BARBER.CREATE_FAILURE,
-      async () => { setNewBarber(initialBarberState); setConfirmPassword(''); await onBarbersUpdate(); }
-    );
+
+    const confirmationResult = await showAddBarberConfirmation(newBarber.Name);
+
+    if (confirmationResult.isConfirmed) {
+
+      if (!checkTokenRole(Role.OWNER)) {
+        toast.error(ErrorMessages.AUTH.UNAUTHORIZED);
+        router.push('/secret-login');
+        return; // Stop if not authorized
+      }
+
+      const result = await handleServiceCall(() => barbersService.createBarber(newBarber.Name, newBarber.Password),
+                                              ErrorMessages.BARBER.CREATE_SUCCESS, ErrorMessages.BARBER.CREATE_FAILURE);
+  
+      if (result.success) {
+        setNewBarber(initialBarberState);
+        setConfirmPassword('');
+        await onBarbersUpdate();
+      }
+    }
   };
 
   const handleDeleteBarber = async (barberId: string) => {
-    const result = await showDeleteConfirmation();
-    if (result.isConfirmed) {
-      await handleServiceCall(
-        () => barbersService.deleteBarber(barberId), ErrorMessages.BARBER.DELETE_SUCCESS, 
-        ErrorMessages.BARBER.DELETE_FAILURE, onBarbersUpdate);
+    const confirmationResult = await showDeleteConfirmation();
+    
+    if (confirmationResult.isConfirmed) {
+
+      if (!checkTokenRole(Role.OWNER)) {
+        toast.error(ErrorMessages.AUTH.UNAUTHORIZED);
+        router.push('/secret-login');
+        return; // Stop if not authorized
+      }
+      
+      const result = await handleServiceCall(() => barbersService.deleteBarber(barberId), 
+                                              ErrorMessages.BARBER.DELETE_SUCCESS, ErrorMessages.BARBER.DELETE_FAILURE
+      );
+
+      if (result.success) {
+        await onBarbersUpdate();
+      }
     }
   };
 
   const handleToggleBarberStatus = async (barber: Barber) => {
     const action = barber.Status ? 'desativar' : 'ativar';
-    const result = await showStatusChangeConfirmation(action, barber.Name);
+    const resultConfirmation = await showStatusChangeConfirmation(action, barber.Name);
     
-    if (result.isConfirmed) {
-      await handleServiceCall(
-        () => barbersService.toggleBarberStatus(barber.Id, !barber.Status),
+    if (resultConfirmation.isConfirmed) {
+
+      if (!checkTokenRole(Role.OWNER)) {
+        toast.error(ErrorMessages.AUTH.UNAUTHORIZED);
+        router.push('/secret-login');
+        return; // Stop if not authorized
+      }
+
+      const result = await handleServiceCall(
+() => barbersService.toggleBarberStatus(barber.Id, !barber.Status),
         barber.Status ? ErrorMessages.BARBER.BARBER_DEACTIVATED_SUCCESS : ErrorMessages.BARBER.BARBER_ACTIVATED_SUCCESS,
-        ErrorMessages.BARBER.UPDATE_STATUS_FAILURE, onBarbersUpdate
+        ErrorMessages.BARBER.UPDATE_STATUS_FAILURE
       );
+      if (result.success) {
+        await onBarbersUpdate();
+      }
     }
   };
 

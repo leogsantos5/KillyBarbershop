@@ -15,7 +15,7 @@ export default function StatisticsGraph({ reservations, timePeriod, drillDown, o
                                         { reservations: Reservation[]; timePeriod: TimePeriod; drillDown: DrillDownState;
                                           onDrillDown: (state: DrillDownState) => void; setTimePeriod: (period: TimePeriod) => void;
                                           setDrillDown: (state: DrillDownState) => void; type: ActiveTab; barbers: Barber[];
-                                          selectedBarberId: string | null; onBarberSelect: (barberId: string | null) => void;
+                                          selectedBarberId: string; onBarberSelect: (barberId: string) => void;
                                           isOwner: boolean;
                                         }) 
 {
@@ -99,8 +99,8 @@ export default function StatisticsGraph({ reservations, timePeriod, drillDown, o
         
         {isOwner && (
           <select
-            value={selectedBarberId || ''} 
-            onChange={(e) => onBarberSelect(e.target.value || null)}
+            value={selectedBarberId} 
+            onChange={(e) => onBarberSelect(e.target.value)}
             className="appearance-none bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg px-6 py-3 pr-12 text-lg font-medium 
                       focus:outline-none focus:border-blue-500 cursor-pointer shadow-sm hover:border-blue-400 transition-colors
                       text-gray-900 dark:text-white">

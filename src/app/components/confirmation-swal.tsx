@@ -21,14 +21,18 @@ export async function showStatusChangeConfirmation(action: string, name: string)
                                  confirmButtonText: `Sim, ${action}!`, cancelButtonText: 'Cancelar'});
 }
 
+export async function showAddBarberConfirmation(name: string) {
+  return showConfirmationDialog({title: 'Confirmar Adição', text: `Tem a certeza que deseja adicionar o barbeiro ${name}?`, 
+                                 icon: 'question', confirmButtonText: 'Sim, adicionar!'});
+}
+
 export async function showClientReservationConfirmation(serviceName: string, date: string, time: string, price: number, barberName?: string) {
   return showConfirmationDialog({
     title: 'Confirmar Marcação',
     html: `Deseja fazer uma marcação de <strong>${serviceName}</strong>:<br> <strong>${date}</strong><br>
            às <strong>${time}</strong>${barberName ? ` com <strong>${barberName}</strong>` : ''}?<br>
            <strong>Preço: ${price}€</strong>`,
-    confirmButtonText: 'Sim, marcar!',
-    cancelButtonText: 'Cancelar'
+    confirmButtonText: 'Sim, marcar!', cancelButtonText: 'Cancelar'
   });
 }
 
@@ -37,8 +41,6 @@ export async function showReservationBarberConfirmation(clientName: string, serv
     title: 'Confirmar Marcação do Cliente',
     html: `Deseja confirmar a marcação de <strong>${clientName}</strong> para:<br> <strong>${serviceName}</strong><br> 
            <strong>${date}</strong><br> às <strong>${time}</strong><br> <strong>Preço: ${price}€</strong>`,
-    confirmButtonText: 'Confirmar Marcação',
-    cancelButtonText: 'Cancelar',
-    icon: 'question'
+    confirmButtonText: 'Confirmar Marcação', cancelButtonText: 'Cancelar', icon: 'question'
   });
 } 

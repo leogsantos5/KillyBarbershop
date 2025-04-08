@@ -5,16 +5,17 @@ import { barbersService } from '../supabase/barbersService'
 import { reservationsService } from '../supabase/reservationsService'
 import { usersService } from '../supabase/usersService'
 import { authService } from '../supabase/authService'
+import { jwtService } from '../supabase/jwtService'
 import { Barber, Reservation } from '../types/booking'
 import StatisticsGraph from '../components/dashboard/statistics-graph'
-import { Toaster, toast } from 'react-hot-toast'
+import { Toaster } from 'react-hot-toast'
 import { ManageReservations } from '../components/dashboard/manage-reservations'
 import { ManageBarbers } from '../components/dashboard/manage-barbers'
 import { ManageUsers } from '../components/dashboard/manage-users'
 import { Sidebar } from '../components/dashboard/sidebar'
 import { TimePeriod, DrillDownState, ActiveTab } from '../types/dashboard'
 import { useRouter } from 'next/navigation'
-import { ErrorMessages } from '../utils/errorMessages'
+import LoadingSpinner from '../components/dashboard/loading-spinner'
 
 const tabs: { activeTab: ActiveTab; label: string }[] = [
   { activeTab: 'my-reservations', label: 'Gerir Marcações' },
@@ -27,15 +28,17 @@ const tabs: { activeTab: ActiveTab; label: string }[] = [
 // check weird css on light mode, dashboard login error show auth credentials wrong
 
 export default function Dashboard() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [isBarbersLoading, setIsBarbersLoading] = useState(false)
+  const [isReservationsLoading, setIsReservationsLoading] = useState(false)
+  const [isUsersLoading, setIsUsersLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<ActiveTab>('my-reservations')
   const [barbers, setBarbers] = useState<Barber[]>([])
   const [users, setUsers] = useState<{ Id: string; Name: string; Phone: string; Status: boolean }[]>([])
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('yearly')
   const [drillDown, setDrillDown] = useState<DrillDownState>({})
-  const [selectedBarberId, setSelectedBarberId] = useState<string | null>(null)
+  const [selectedBarberId, setSelectedBarberId] = useState<string>('')
   const [currentPage, setCurrentPage] = useState(1)
   const [totalUsers, setTotalUsers] = useState(0)
   const [isOwner, setIsOwner] = useState(false)
@@ -44,104 +47,78 @@ export default function Dashboard() {
   const router = useRouter()
 
   useEffect(() => {
-    if (!isAuthenticated) return;
-
-    const checkSessionInterval = setInterval(async () => {
-      const response = await authService.checkSession();
-      if (response.error) {
-        setIsAuthenticated(false);
-        setIsOwner(false);
-        setSelectedBarberId(null);
-        toast.error(ErrorMessages.AUTH.SESSION_EXPIRED);
-      }
-    }, 60000); // Check every minute
-
-    return () => clearInterval(checkSessionInterval);
-  }, [isAuthenticated]);
-
-  useEffect(() => {
     const checkAuth = async () => {
-      try {
-        const response = await authService.checkSession();
-        if (response.error) {
-          setIsAuthenticated(false);
-          return;
-        }
-        setIsAuthenticated(true);
-        setIsOwner(response.isOwner);
-        setSelectedBarberId(response.barberId);
-
-        if (!response.isOwner && response.barberId) {
-          setDrillDown({ barberId: response.barberId });
-        }
-      } catch {
-        setIsAuthenticated(false);
-      } finally {
-        setIsLoading(false);
+      const error = await authService.checkSession();
+      if (error) {
+        router.push('/secret-login');
+        return;
       }
+      
+      // Get barber info from token
+      const token = sessionStorage.getItem('authToken');
+      if (token) {
+        const payload = await jwtService.verifyToken(token);
+        const barberId = payload.barberId as string;
+        const isOwner = payload.isOwner as boolean;
+        
+        setIsOwner(isOwner);
+        setSelectedBarberId(barberId);
+
+        if (!isOwner && barberId) {
+          setDrillDown({ barberId });
+        }
+      }
+
+      setIsLoading(false);      
     };
 
     checkAuth();
   }, [router]);
 
-  useEffect(() => {
-    const fetchBarbers = async () => {
-      const { success, data } = await barbersService.fetchAllBarbers();
-      if (success && data) {
-        setBarbers(data);
-      }
-    };
-
-    if (isAuthenticated) {
-      fetchBarbers();
-    }
-  }, [isAuthenticated]);
-
   const availableTabs = tabs.filter(tab => 
     isOwner || ['my-reservations', 'revenue', 'appointments'].includes(tab.activeTab)
   )
 
-  const fetchUsers = useCallback(async () => {
-    setIsLoading(true)
-    const { success, data, total } = await usersService.fetchAllUsers(currentPage, pageSize)
+  const fetchAllBarbers = useCallback(async () => {
+    setIsBarbersLoading(true);
+    const { success, data } = await barbersService.fetchAllBarbers();
     if (success && data) {
-      setUsers(data)
-      setTotalUsers(total || 0)
-    } 
-    setIsLoading(false)
-  }, [currentPage, pageSize])
+      setBarbers(data);
+    }
+    setIsBarbersLoading(false);
+  }, []);
 
-  const fetchAllReservations = async () => {
-    const { success, data } = await reservationsService.fetchAllReservations()
+  const fetchAllReservations = useCallback(async () => {
+    setIsReservationsLoading(true);
+    const { success, data } = await reservationsService.fetchAllReservations();
     if (success && data) {
-      setReservations(data)
-    } 
-  }
+      setReservations(data);
+    }
+    setIsReservationsLoading(false);
+  }, []);
 
-  const getConfirmedReservations = () => {
-    return reservations.filter(reservation => reservation.Status)
-  }
-
-  useEffect(() => {
-    fetchAllBarbers()
-    fetchAllReservations()
-    fetchUsers()
-    // Scroll down a bit to hide header and navbar
-    window.scrollTo(0, 90)
-  }, [fetchUsers])
+  const fetchAllUsers = useCallback(async () => {
+    setIsUsersLoading(true);
+    const { success, data, total } = await usersService.fetchAllUsers(currentPage, pageSize);
+    if (success && data) {
+      setUsers(data);
+      setTotalUsers(total || 0);
+    }
+    setIsUsersLoading(false);
+  }, [currentPage, pageSize]);
 
   useEffect(() => {
     if (activeTab === 'users') {
-      fetchUsers()
+      fetchAllUsers();
+    } else if (activeTab === 'barbers') {
+      fetchAllBarbers();
+    } else if (activeTab === 'my-reservations') {
+      fetchAllReservations();
     }
-  }, [currentPage, activeTab, fetchUsers])
+  }, [currentPage, activeTab, fetchAllUsers, fetchAllBarbers, fetchAllReservations]);
 
-  const fetchAllBarbers = async () => {
-    const { success, data } = await barbersService.fetchAllBarbers()
-    if (success && data) {
-      setBarbers(data)
-    } 
-    setIsLoading(false)
+  const getConfirmedReservations = () => {
+    return reservations.filter(reservation => reservation.Status)
   }
 
   const handleDrillDown = (newState: DrillDownState) => {
@@ -159,33 +136,7 @@ export default function Dashboard() {
   }
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-        <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-red-600 border-t-transparent"></div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-        <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-md w-96">
-          <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Área Reservada</h2>
-          <form onSubmit={async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.currentTarget);
-            const response = await authService.signIn(formData.get('name') as string, formData.get('password') as string);
-            if (response.error) { toast.error(response.error); return; }
-            setIsAuthenticated(true); setIsOwner(response.isOwner); setSelectedBarberId(response.barberId);
-          }} className="space-y-4">
-            
-            <div><input type="text" name="name" className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Nome"/></div>
-            <div><input type="password" name="password" className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Password"/></div>
-            <button type="submit" className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Entrar</button>
-          </form>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner variant="dashboard-page" />;
   }
 
   return (
@@ -206,53 +157,63 @@ export default function Dashboard() {
       </div>
 
       <div className="flex h-screen">
-      <Sidebar isOpen={isSidebarOpen} activeTab={activeTab} availableTabs={availableTabs}
-          onTabChange={(tab) => { setActiveTab(tab); setIsSidebarOpen(false); }} />
+        <Sidebar isOpen={isSidebarOpen} activeTab={activeTab} availableTabs={availableTabs}
+            onTabChange={(tab) => { setActiveTab(tab); setIsSidebarOpen(false); }} />
         {/* Main Content */}
         <div className="flex-1 p-4 lg:p-8 overflow-auto">
-          {isLoading ? (
-            <div className="flex items-center justify-center mb-20 min-h-[calc(100vh-4rem)]">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-red-600 border-t-transparent"></div>
+          {activeTab === 'revenue' && (
+            <div className="bg-white dark:bg-gray-800 p-4 lg:p-6 rounded-lg shadow border-l-4 border-blue-600">
+              <StatisticsGraph 
+                reservations={reservations} timePeriod={timePeriod} drillDown={drillDown} onDrillDown={handleDrillDown} 
+                setTimePeriod={setTimePeriod} setDrillDown={setDrillDown} type="revenue" barbers={barbers} 
+                selectedBarberId={selectedBarberId} onBarberSelect={setSelectedBarberId} isOwner={isOwner} />
             </div>
-          ) : (
-            <>
-              {activeTab === 'revenue' && (
-                <div className="bg-white dark:bg-gray-800 p-4 lg:p-6 rounded-lg shadow border-l-4 border-blue-600">
-                  <StatisticsGraph 
-                    reservations={reservations} timePeriod={timePeriod} drillDown={drillDown} onDrillDown={handleDrillDown} 
-                    setTimePeriod={setTimePeriod} setDrillDown={setDrillDown} type="revenue" barbers={barbers} 
-                    selectedBarberId={selectedBarberId} onBarberSelect={setSelectedBarberId} isOwner={isOwner} />
-                </div>
-              )}
+          )}
 
-              {activeTab === 'appointments' && (
-                <div className="bg-white dark:bg-gray-800 p-4 lg:p-6 rounded-lg shadow border-l-4 border-blue-600">
-                  <StatisticsGraph 
-                    reservations={reservations} timePeriod={timePeriod} drillDown={drillDown} onDrillDown={handleDrillDown} 
-                    setTimePeriod={setTimePeriod} setDrillDown={setDrillDown} type="appointments" barbers={barbers} 
-                    selectedBarberId={selectedBarberId} onBarberSelect={setSelectedBarberId} isOwner={isOwner} />
-                </div>
-              )}
+          {activeTab === 'appointments' && (
+            <div className="bg-white dark:bg-gray-800 p-4 lg:p-6 rounded-lg shadow border-l-4 border-blue-600">
+              <StatisticsGraph 
+                reservations={reservations} timePeriod={timePeriod} drillDown={drillDown} onDrillDown={handleDrillDown} 
+                setTimePeriod={setTimePeriod} setDrillDown={setDrillDown} type="appointments" barbers={barbers} 
+                selectedBarberId={selectedBarberId} onBarberSelect={setSelectedBarberId} isOwner={isOwner} />
+            </div>
+          )}
 
-              {isOwner && activeTab === 'users' && (
-                <div className="bg-white dark:bg-gray-800 p-4 lg:p-6 rounded-lg shadow border-l-4 border-blue-600">
-                  <ManageUsers users={users} reservations={getConfirmedReservations()} isLoading={isLoading} currentPage={currentPage} 
-                            totalUsers={totalUsers} pageSize={pageSize} onPageChange={handlePageChange} onUsersUpdate={fetchUsers} />
+          {isOwner && activeTab === 'users' && (
+            <div className="bg-white dark:bg-gray-800 p-4 lg:p-6 rounded-lg shadow border-l-4 border-blue-600 min-h-[300px] flex flex-col">
+              {isUsersLoading ? (
+                <div className="flex justify-center items-center flex-grow">
+                  <LoadingSpinner variant="dashboard-tab" />
                 </div>
+              ) : (
+                <ManageUsers users={users} reservations={getConfirmedReservations()} isLoading={isUsersLoading} currentPage={currentPage} 
+                          totalUsers={totalUsers} pageSize={pageSize} onPageChange={handlePageChange} onUsersUpdate={fetchAllUsers} />
               )}
+            </div>
+          )}
 
-              {isOwner && activeTab === 'barbers' && (
-                <div className="bg-white dark:bg-gray-800 p-4 lg:p-6 rounded-lg shadow border-l-4 border-blue-600">
-                  <ManageBarbers barbers={barbers} isLoading={isLoading} onBarbersUpdate={fetchAllBarbers} />
+          {isOwner && activeTab === 'barbers' && (
+            <div className="bg-white dark:bg-gray-800 p-4 lg:p-6 rounded-lg shadow border-l-4 border-blue-600 min-h-[300px] flex flex-col">
+              {isBarbersLoading ? (
+                <div className="flex justify-center items-center flex-grow">
+                  <LoadingSpinner variant="dashboard-tab" />
                 </div>
+              ) : (
+                <ManageBarbers barbers={barbers} isLoading={isBarbersLoading} onBarbersUpdate={fetchAllBarbers} />
               )}
+            </div>
+          )}
 
-              {activeTab === 'my-reservations' && (
-                <div className="bg-white dark:bg-gray-800 p-4 lg:p-6 rounded-lg shadow border-l-4 border-blue-600">
-                  <ManageReservations isLoading={isLoading} currentBarberId={selectedBarberId || ''}/>
+          {activeTab === 'my-reservations' && (
+            <div className="bg-white dark:bg-gray-800 p-4 lg:p-6 rounded-lg shadow border-l-4 border-blue-600 min-h-[300px] flex flex-col">
+              {isReservationsLoading ? (
+                <div className="flex justify-center items-center flex-grow">
+                  <LoadingSpinner variant="dashboard-tab" />
                 </div>
+              ) : (
+                <ManageReservations isLoading={isReservationsLoading} currentBarberId={selectedBarberId}/>
               )}
-            </>
+            </div>
           )}
         </div>
       </div>

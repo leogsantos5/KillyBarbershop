@@ -3,22 +3,21 @@ import { ServiceResponse } from '../types/other';
 
 type ServiceFunction = () => Promise<ServiceResponse>;
 
-export async function handleServiceCall(serviceCall: ServiceFunction, successMessage: string, 
-                                        errorMessage: string, onSuccess?: () => void): Promise<boolean> {
+export async function handleServiceCall(serviceCall: ServiceFunction, successMessage: string, errorMessage: string) : 
+                      Promise<ServiceResponse> {
   try {
     const result = await serviceCall();
+    
     if (result.success) {
       toast.success(successMessage);
-      if (onSuccess) {
-        onSuccess();
-      }
-      return true;
     } else {
-      toast.error(errorMessage);
-      return false;
+      const errorToShow = result.error instanceof Error ? result.error.message : errorMessage;
+      toast.error(errorToShow);
     }
-  } catch {
-    toast.error(errorMessage);
-    return false;
+    return result;
+  } catch (error) {
+    const errorToShow = error instanceof Error ? error.message : errorMessage;
+    toast.error(errorToShow);
+    return { success: false, error: error instanceof Error ? error : new Error(errorMessage) };
   }
 } 

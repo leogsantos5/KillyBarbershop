@@ -6,6 +6,9 @@ import { showDeleteConfirmation, showReservationBarberConfirmation } from '../co
 import { handleServiceCall } from '../../utils/serviceHandler';
 import { ErrorMessages } from '../../utils/errorMessages';
 import { filterActiveBarberReservations } from '../../utils/filterReservations';
+import { Role } from '@/app/utils/checkTokenRole';
+import { checkTokenRole } from '@/app/utils/checkTokenRole';
+import { useRouter } from 'next/navigation';
 
 interface ManageReservationsProps { 
   isLoading: boolean;
@@ -13,6 +16,8 @@ interface ManageReservationsProps {
 }
 
 export function ManageReservations({ isLoading, currentBarberId } : ManageReservationsProps) {
+  const router = useRouter();
+
   const [barberPendingReservations, setBarberPendingReservations] = useState<Reservation[]>([]);
   const [barberConfirmedReservations, setBarberConfirmedReservations] = useState<Reservation[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,18 +51,38 @@ export function ManageReservations({ isLoading, currentBarberId } : ManageReserv
       );
 
       if (confirmation.isConfirmed) {
-        await handleServiceCall(
-          () => reservationsService.confirmReservation(reservation.Id), ErrorMessages.RESERVATION.CONFIRM_BARBER_SUCCESS,
-          ErrorMessages.RESERVATION.CONFIRM_FAILURE, fetchBarberReservations
+
+        if (!checkTokenRole(Role.BARBER)) {
+          toast.error(ErrorMessages.AUTH.UNAUTHORIZED);
+          router.push('/secret-login');
+          return; // Stop if not authorized
+        }
+
+        const result = await handleServiceCall(() => reservationsService.confirmReservation(reservation.Id), 
+          ErrorMessages.RESERVATION.CONFIRM_BARBER_SUCCESS, ErrorMessages.RESERVATION.CONFIRM_FAILURE
         );
+
+        if (result.success) await fetchBarberReservations();
       }
   };
 
   const handleDeleteReservation = async (reservationId: string) => {
-    const result = await showDeleteConfirmation();
-    if (result.isConfirmed) {
-      await handleServiceCall(() => reservationsService.deleteReservation(reservationId),
-        ErrorMessages.RESERVATION.DELETE_SUCCESS, ErrorMessages.RESERVATION.DELETE_FAILURE, fetchBarberReservations);
+    const resultConfirmation = await showDeleteConfirmation();
+    if (resultConfirmation.isConfirmed) {
+
+      if (!checkTokenRole(Role.BARBER)) {
+        toast.error(ErrorMessages.AUTH.UNAUTHORIZED);
+        router.push('/secret-login');
+        return; // Stop if not authorized
+      }
+
+      const result = await handleServiceCall(
+        () => reservationsService.deleteReservation(reservationId),
+        ErrorMessages.RESERVATION.DELETE_SUCCESS, 
+        ErrorMessages.RESERVATION.DELETE_FAILURE
+      );  
+
+      if (result.success) await fetchBarberReservations();
     }
   };
 

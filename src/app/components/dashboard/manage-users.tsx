@@ -5,6 +5,9 @@ import { showStatusChangeConfirmation } from '../confirmation-swal';
 import { handleServiceCall } from '../../utils/serviceHandler';
 import { ErrorMessages } from '../../utils/errorMessages';
 import { countClientAppointments } from '../../utils/filterReservations';
+import { checkTokenRole, Role } from '../../utils/checkTokenRole';
+import { toast } from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 interface ManageUsersProps {
   users: { Id: string; Name: string; Phone: string; Status: boolean }[]; reservations: Reservation[];
@@ -14,7 +17,7 @@ interface ManageUsersProps {
 
 export function ManageUsers({ users, reservations, isLoading, currentPage, totalUsers, 
                               pageSize, onPageChange, onUsersUpdate }: ManageUsersProps) {
-
+  const router = useRouter();
   const [searchInput, setSearchInput] = useState('');
 
   const handleSearch = (e: React.FormEvent) => {
@@ -31,12 +34,21 @@ export function ManageUsers({ users, reservations, isLoading, currentPage, total
   const handleToggleUserStatus = async (user: { Id: string; Name: string; Phone: string; Status: boolean }) => {
     const action = user.Status ? 'banir' : 'desbanir';
     const result = await showStatusChangeConfirmation(action, user.Name);
-    
+
     if (result.isConfirmed) {
-      await handleServiceCall(
-        () => usersService.toggleUserStatus(user.Id, !user.Status),
-        user.Status ? ErrorMessages.USER.USER_UNBAN_SUCCESS : ErrorMessages.USER.USER_BAN_SUCCESS,
-        ErrorMessages.USER.UPDATE_STATUS_FAILURE, onUsersUpdate);
+      
+      if (!checkTokenRole(Role.OWNER)) {
+        toast.error(ErrorMessages.AUTH.UNAUTHORIZED);
+        router.push('/secret-login');
+        return; // Stop if not authorized
+      }
+
+      const serviceResult = await handleServiceCall(() => usersService.toggleUserStatus(user.Id, user.Status),
+        user.Status ? ErrorMessages.USER.USER_BAN_SUCCESS : ErrorMessages.USER.USER_UNBAN_SUCCESS,
+        ErrorMessages.USER.UPDATE_STATUS_FAILURE
+      );
+
+      if (serviceResult.success) await onUsersUpdate();
     }
   };
 

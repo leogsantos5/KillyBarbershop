@@ -17,10 +17,10 @@ export default function SecretLogin() {
     setIsLoading(true);
 
     try {
-      const response = await authService.signIn(formData.name, formData.password);
+      const error = await authService.signIn(formData.name, formData.password);
       
-      if (response.error) {
-        setError(response.error);
+      if (error) {
+        setError(error);
         return;
       }
 

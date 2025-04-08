@@ -1,13 +1,14 @@
 import supabase from "../services/supabaseClient";
 import { hashPassword } from "../utils/passwordUtils";
 import { ErrorMessages } from "../utils/errorMessages";
+import { Barber } from '../types/booking';
 
 export const barbersService = {
     async fetchAllBarbers() {
       try {
         const { data, error } = await supabase.from('Barbers').select('*');
         if (error) throw error;
-        return { success: true, data };
+        return { success: true, data: data as Barber[]};
       } catch (error) {
         return { success: false, error: error instanceof Error ? error : new Error(ErrorMessages.BARBER.FETCH_FAILURE)};
       }
@@ -17,7 +18,7 @@ export const barbersService = {
       try {
         const { data, error } = await supabase.from('Barbers').select('*').eq('Id', barberId).single();
         if (error) throw error;
-        return { success: true, data };
+        return { success: true, data: data as Barber};
       } catch (error) {
         return { success: false, error: error instanceof Error ? error : new Error(ErrorMessages.BARBER.FETCH_FAILURE)};
       }
@@ -25,9 +26,9 @@ export const barbersService = {
 
     async fetchActiveBarbers() {
       try {
-        const { data, error } = await supabase.from('Barbers').select('*').eq('Status', true); // only active barbers
+        const { data, error } = await supabase.from('Barbers').select('*').eq('Status', true); 
         if (error) throw error;
-        return { success: true, data };
+        return { success: true, data: data as Barber[]};
       } catch (error) {
         return { success: false, error: error instanceof Error ? error : new Error(ErrorMessages.BARBER.FETCH_FAILURE)};
       }
@@ -35,9 +36,10 @@ export const barbersService = {
 
     async fetchBarber(barberName: string) {
       try {
-        const { data, error } = await supabase.from('Barbers').select('Id, Name, Password').eq('Name', barberName).single();
+        const { data, error } = await supabase.from('Barbers').select('*')
+                                              .eq('Name', barberName).single();
         if (error) throw error;
-        return { success: true, data };
+        return { success: true, data: data as Barber};
       } catch (error) {
         return { success: false, error: error instanceof Error ? error : new Error(ErrorMessages.BARBER.FETCH_FAILURE)};
       }
@@ -69,7 +71,6 @@ export const barbersService = {
     async toggleBarberStatus(barberId: string, currentStatus: boolean) {
       try {
         const { error } = await supabase.from('Barbers').update({ Status: !currentStatus }).eq('Id', barberId);
-        if (error) throw error;
         if (error) throw error;
         return { success: true };
       } catch (error) {

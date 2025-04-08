@@ -51,7 +51,9 @@ export const ErrorMessages = {
       BARBER_NOT_FOUND: 'Barbeiro não encontrado',
       OWNER_NOT_FOUND: 'Proprietário não encontrado',
       INVALID_SESSION: 'Sessão inválida',
-      SESSION_EXPIRED: 'Sessão expirada. Por favor insira as credenciais novamente.'
+      SESSION_EXPIRED: 'Sessão expirada. Por favor insira as credenciais novamente.',
+      INVALID_TOKEN: 'Token expirado ou inválido.',
+      UNAUTHORIZED: 'Não tem permissão para realizar esta acção.'
     },
     SERVICE: {
       FETCH_FAILURE: "Não foi possível carregar os serviços de barbeiro",

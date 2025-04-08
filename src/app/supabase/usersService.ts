@@ -78,13 +78,9 @@ export const usersService = {
   },
 
   async toggleUserStatus(userId: string, currentStatus: boolean) {
-    try {
-      const { error } = await supabase.from('Users').update({ Status: !currentStatus }).eq('Id', userId);
-
-      if (error) throw error;
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: error instanceof Error ? error : new Error(ErrorMessages.USER.UPDATE_STATUS_FAILURE)};
-    }
+    const { error } = await supabase.from('Users').update({ Status: !currentStatus }).eq('Id', userId).select();
+    if (error) throw new Error(ErrorMessages.USER.UPDATE_STATUS_FAILURE);
+    
+    return { success: true };
   }
 };
