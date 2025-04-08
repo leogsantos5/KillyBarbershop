@@ -13,15 +13,10 @@ export const generateAllCalendarSlots = (startDate: Date, endDate: Date, selecte
             const slotStart = setMinutes(setHours(currentDate, hour), minutes);      
             if (isBefore(slotStart, minimumBookingTime)) continue;
                  
-            slotsVMs.push({
-              Start: slotStart,
-              End: addMinutes(slotStart, 30),
-              Status: undefined,
-              UserName: '',
-              UserPhone: '',
-              BarberId: selectedBarber?.Id || '',
-              BarberName: selectedBarber?.Name || '',
-              BarberPhone: selectedBarber?.Phone || ''
+            slotsVMs.push({Start: slotStart, End: addMinutes(slotStart, 30), Status: undefined,
+              ServiceId: '', ServiceName: '', ServicePrice: 0, ServiceDuration: '',
+              UserName: '', UserPhone: '', BarberId: selectedBarber?.Id || '',
+              BarberName: selectedBarber?.Name || '', BarberPhone: selectedBarber?.Phone || ''
             });
           }
         }

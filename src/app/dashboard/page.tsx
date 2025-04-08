@@ -24,6 +24,8 @@ const tabs: { activeTab: ActiveTab; label: string }[] = [
   { activeTab: 'appointments', label: 'Número de Marcações' }
 ];
 
+// check weird css on light mode, dashboard login error show auth credentials wrong
+
 export default function Dashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -41,7 +43,6 @@ export default function Dashboard() {
   const pageSize = 10
   const router = useRouter()
 
-  // Add periodic session check
   useEffect(() => {
     if (!isAuthenticated) return;
 
@@ -69,7 +70,7 @@ export default function Dashboard() {
         setIsAuthenticated(true);
         setIsOwner(response.isOwner);
         setSelectedBarberId(response.barberId);
-        // If it's a barber view, set the drillDown to show their data
+
         if (!response.isOwner && response.barberId) {
           setDrillDown({ barberId: response.barberId });
         }
@@ -96,7 +97,6 @@ export default function Dashboard() {
     }
   }, [isAuthenticated]);
 
-  // Filter tabs based on user type
   const availableTabs = tabs.filter(tab => 
     isOwner || ['my-reservations', 'revenue', 'appointments'].includes(tab.activeTab)
   )
