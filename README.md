@@ -34,8 +34,9 @@
 ## 🧰 Tech Stack
 
 ### Frontend
-- **Next.js 15 (App Router)**
+- **Next.js 15**
 - **React**
+- **TypeScript**
 - **Tailwind CSS**
 
 ### Backend & Services
