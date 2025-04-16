@@ -90,7 +90,7 @@
   - Booking Page: ![image](https://github.com/user-attachments/assets/dc7951bc-e38d-4c91-8e67-d81c33ef88ef)
   - Landing Page (Top part): ![image](https://github.com/user-attachments/assets/7ed87684-6364-46e6-b436-0c8e5079752f)
   - Services showcase Page: ![image](https://github.com/user-attachments/assets/e495c569-f02c-448f-a0ca-4b5fe1ea9af8)
-  - Barber Dashboard Manage Reservations Page: ![image](https://github.com/user-attachments/assets/c98c23bf-ce05-433c-8957-bf17504ea9a1)
+  - Barber Dashboard Manage Reservations Page: ![Captura de ecrã 2025-04-16 011543](https://github.com/user-attachments/assets/3797f4f2-e39f-40bf-a89e-844d4e4f4931)
   - Admin Dashboard Manage Barbers Page: ![image](https://github.com/user-attachments/assets/c8292389-1d13-4afc-bd90-5acfd74e3c8a)
   - Admin Dashboard Manage Users Page: ![Captura de ecrã 2025-04-16 012313](https://github.com/user-attachments/assets/5b67e3a6-f853-49fb-a25b-00226b257843)
   - Admin Dashboard Revenue Statistics Page: ![image](https://github.com/user-attachments/assets/c5c3f58c-1495-4b3e-b664-e26a08f763ac)
