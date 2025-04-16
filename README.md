@@ -1,36 +1,99 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💈 Killy Barbershop Web App
 
-## Getting Started
+> A full-featured, custom-built booking platform for my local barbershop — **Killy Barbershop in Alfragide, Portugal**, where I’ve been a regular for the past 4 years.  
 
-First, run the development server:
+> This is a real-world project developed entirely by me, from design to deployment. Built with **Next.js, React, Tailwind CSS**, and **Supabase with PostgreSQL**, it handles complex booking logic, real-time barber availability, SMS confirmations, and admin tools for managing staff, clients, and revenue.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 🔗 Live Preview
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+➡️ [https://killy-barbershop.vercel.app](https://killy-barbershop.vercel.app)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+🔒 Secret admin login: `/secret-login`. 
+> Fake credentials on testing environment: Name - Killy Ross, Password - KillyPass123
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🧠 Project Summary
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**Killy Barbershop** is more than just a booking app — it’s a full business platform built to help local barbers manage their entire operation:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- 📅 Smart booking with **least-busy barber auto-assignment**
+- 💈 Barber selection, time/day availability, and service filtering
+- 📞 **Phone number validation** using the **NumVerify API** (inactive for cost purposes)
+- ✉️ **SMS reservation confirmation** with **Twilio API** (inactive for cost purposes)
+- 🔐 Role-based **JWT authentication** via **Supabase RLS Policy**
+- 📊 Admin dashboard with **revenue and appointment analytics**
+- ⚙️ Full CRUD for services, users, and barbers
+- 🎨 Polished UI for light and dark mode, responsive for all devices **Tailwind CSS**
+- 🧪 Built-in access protection via "secret login route"
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🧰 Tech Stack
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Frontend
+- **Next.js 15 (App Router)**
+- **React**
+- **Tailwind CSS**
+
+### Backend & Services
+- **Supabase with PostgreSQL** (auth, database, RLS, API)
+- **NumVerify API** (PT phone number validation)
+- **Twilio API** (SMS messaging)
+- **JWT Auth** (role-based access)
+
+---
+
+## 👤 User Roles & Features
+
+### 👤 Client / Visitor
+- View **landing page**, **services**, and **booking form**
+- Choose preferred **barber**, **day**, **time**, and **service**
+- Receive **SMS with reservation details**
+- If no barber is selected, the system assigns the **least busy barber**
+
+### 💈 Barber
+- Login via secret route `/secret-login`
+- View and manage **their own reservations**
+- See **their own statistics**
+
+### 👑 Owner (Admin)
+- All barber permissions, plus:
+  - 👥 Manage **clients** (ban, view total reservations history)
+  - ✂️ Manage **barbers** (activate/deactivate, delete)
+  - 📊 View analytics:
+    - Revenue and appointment count
+    - Filter by **barber**, **week**, **month**, or **year**
+
+---
+
+## 🧪 Features Under the Hood
+
+- 📦 Supabase database with **RLS (Row Level Security)** for access control
+- ⚖️ Algorithm to assign the least busy barber 
+- 🧠 First time using **Cursor AI** (assisted, not copy-pasted)
+- 🛠 Built with an emphasis on **code readability, separation of concerns, DRY**, and **clean UI/UX**
+
+---
+
+## 📦 Project Status
+
+✅ Core functionality complete  
+🔄 Dashboard polish, bug fixing and further testing in progress  
+🚀 Preparing for real deployment with barbershop team
+
+---
+## 📸 Screenshots (In constant development)
+
+  - Booking Page: ![image](https://github.com/user-attachments/assets/dc7951bc-e38d-4c91-8e67-d81c33ef88ef)
+  - Landing Page (Top part): ![image](https://github.com/user-attachments/assets/7ed87684-6364-46e6-b436-0c8e5079752f)
+  - Services showcase Page: ![image](https://github.com/user-attachments/assets/e495c569-f02c-448f-a0ca-4b5fe1ea9af8)
+  - Barber Dashboard Manage Reservations Page: ![image](https://github.com/user-attachments/assets/c98c23bf-ce05-433c-8957-bf17504ea9a1)
+  - Admin Dashboard Manage Barbers Page: ![image](https://github.com/user-attachments/assets/c8292389-1d13-4afc-bd90-5acfd74e3c8a)
+  - Admin Dashboard Manage Users Page: ![Captura de ecrã 2025-04-16 012313](https://github.com/user-attachments/assets/5b67e3a6-f853-49fb-a25b-00226b257843)
+  - Admin Dashboard Revenue Statistics Page: ![image](https://github.com/user-attachments/assets/c5c3f58c-1495-4b3e-b664-e26a08f763ac)
+
+---
+
