@@ -9,11 +9,11 @@ export const generateAllCalendarSlots = (startDate: Date, endDate: Date, selecte
     while (currentDate <= endDate) {
       if (getDay(currentDate) !== 0) {
         for (let hour = 9; hour < 19; hour++) {
-          for (let minutes = 0; minutes < 60; minutes += 30) {
+          for (let minutes = 0; minutes < 60; minutes += 15) {
             const slotStart = setMinutes(setHours(currentDate, hour), minutes);      
             if (isBefore(slotStart, minimumBookingTime)) continue;
                  
-            slotsVMs.push({Start: slotStart, End: addMinutes(slotStart, 30), Status: undefined,
+            slotsVMs.push({Start: slotStart, End: addMinutes(slotStart, 15), Status: undefined,
               ServiceId: '', ServiceName: '', ServicePrice: 0, ServiceDuration: '',
               UserName: '', UserPhone: '', BarberId: selectedBarber?.Id || '',
               BarberName: selectedBarber?.Name || '', BarberPhone: selectedBarber?.Phone || ''

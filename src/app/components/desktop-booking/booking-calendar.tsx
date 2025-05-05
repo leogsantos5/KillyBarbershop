@@ -49,8 +49,9 @@ export function DesktopBooking({ barbers, slots, selectedBarber, onSelectBarber,
                       [&_.rbc-btn-group>button]:dark:!text-gray-200 [&_.rbc-time-slot]:dark:!border-gray-600 
                       [&_.rbc-events-container]:dark:!border-gray-600 [&_.rbc-day-bg]:dark:!border-gray-600 
                       [&_.rbc-header+.rbc-header]:dark:!border-gray-600 [&_.rbc-btn-group>button:hover]:dark:!bg-gray-700 
-                      [&_.rbc-btn-group>button:hover]:dark:!text-white">
+                      [&_.rbc-btn-group>button:hover]:dark:!text-white [&_.rbc-time-slot]:!min-h-[30px]">
         <Calendar
+          step={15}
           localizer={localizer}
           events={slots}
           startAccessor="Start"

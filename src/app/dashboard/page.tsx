@@ -80,6 +80,7 @@ export default function Dashboard() {
   )
 
   const fetchAllBarbers = useCallback(async () => {
+    debugger;
     setIsBarbersLoading(true);
     const { success, data } = await barbersService.fetchAllBarbers();
     if (success && data) {

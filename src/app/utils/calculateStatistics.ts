@@ -1,5 +1,6 @@
 import { Reservation } from '../types/booking'
 import { TimePeriod, DrillDownState, ActiveTab, StatisticsData } from '../types/dashboard'
+import { format } from 'date-fns'
 
 const PRICE_PER_APPOINTMENT = 12;
 
@@ -67,17 +68,31 @@ export function calculateStatistics(reservations: Reservation[], timePeriod: Tim
       reservations, months, (res, month) => {
         const resDate = new Date(res.StartTime);
         return resDate.getMonth() === month && resDate.getFullYear() === currentYear;
-      }, month => new Date(2000, month).toLocaleString('pt-PT', { month: 'long' }), type);
+      }, month => {
+        const monthName = new Date(2000, month).toLocaleString('pt-PT', { month: 'long' });
+        return monthName.charAt(0).toUpperCase() + monthName.slice(1);
+      }, type);
   } 
   else if (timePeriod === 'weekly') {
-    const weeks = Array.from({ length: 7 }, (_, i) => i);
+    // For weekly view, show weeks of the selected month
+    const selectedMonth = drillDown.month ?? now.getMonth();
+    const firstDay = new Date(currentYear, selectedMonth, 1);
+    const lastDay = new Date(currentYear, selectedMonth + 1, 0);
+    const weeksInMonth = Math.ceil((lastDay.getDate() + firstDay.getDay()) / 7);
+    
+    const weeks = Array.from({ length: weeksInMonth }, (_, i) => i);
     return calculatePeriodData(
       reservations, weeks, (res, week) => {
         const resDate = new Date(res.StartTime);
-        return resDate.getDay() === week && 
-               resDate.getMonth() === (drillDown.month ?? now.getMonth()) &&
-               resDate.getFullYear() === currentYear;
-      }, week => new Date(2000, 0, week + 1).toLocaleString('pt-PT', { weekday: 'long' }), type);
+        const weekStart = new Date(currentYear, selectedMonth, week * 7 - firstDay.getDay() + 1);
+        const weekEnd = new Date(currentYear, selectedMonth, Math.min(week * 7 - firstDay.getDay() + 7, lastDay.getDate()));
+        return resDate >= weekStart && resDate <= weekEnd;
+      }, week => {
+        const weekStart = new Date(currentYear, selectedMonth, week * 7 - firstDay.getDay() + 1);
+        const weekEnd = new Date(currentYear, selectedMonth, Math.min(week * 7 - firstDay.getDay() + 7, lastDay.getDate()));
+        const monthName = weekEnd.toLocaleString('pt-PT', { month: 'short' });
+        return `${format(weekStart, 'd')} - ${format(weekEnd, 'd')} ${monthName.charAt(0).toUpperCase() + monthName.slice(1)}`;
+      }, type);
   }
 
   return { data: [], labels: [] };

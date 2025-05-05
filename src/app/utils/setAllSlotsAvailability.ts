@@ -11,8 +11,18 @@ export function updateAllSlotsAvailability(allSlots: BookingSlotVM[], bookingsBy
         const bookingsForSlot = bookingsBySlot.get(timestampKey) || [];
         let updatedStatus: boolean | undefined = undefined;
 
-        if (selectedBarber)
-        {
+        // Check if this slot is part of any existing reservation
+        const isPartOfExistingReservation = Array.from(bookingsBySlot.values()).some(reservations => 
+            reservations.some(booking => {
+                const bookingStart = new Date(booking.StartTime);
+                const bookingEnd = new Date(booking.EndTime);
+                return slot.Start >= bookingStart && slot.Start < bookingEnd;
+            })
+        );
+
+        if (isPartOfExistingReservation) {
+            updatedStatus = false;
+        } else if (selectedBarber) {
             // Check if the selected barber is booked for this slot
             const barberBooking = bookingsForSlot.find(booking => booking.Barbers?.Id === selectedBarber.Id);
             if (barberBooking) {
@@ -37,5 +47,5 @@ export function updateAllSlotsAvailability(allSlots: BookingSlotVM[], bookingsBy
     }
 
     return allUpdatedSlots;
-  }
+}
   

@@ -4,7 +4,8 @@ import { Reservation, BookingSlotVM, Barber, BookingFormData } from '../types/bo
 import { usersService } from './usersService';
 import { calculateLeastOccupiedBarberForDay } from '../utils/calculateLeastOccupiedBarber';
 import { sendConfirmationSMS } from '../services/twilioService';
-import { PAID_FEATURES } from '../utils/navigationPages';
+import { CLOSING_TIME, PAID_FEATURES } from '../utils/navigationPages';
+import { addMinutes } from 'date-fns';
 
 export const reservationsService = {
 
@@ -108,16 +109,58 @@ export const reservationsService = {
         barberId = calculateLeastOccupiedBarberForDay(reservationDay, barbers, bookedSlots);
       }
 
+      // Get the service duration
+      const { data: service } = await supabase
+        .from('Services')
+        .select('Duration')
+        .eq('Id', formData.ServiceId)
+        .single();
+
+      if (!service) {
+        throw new Error(ErrorMessages.SERVICE.FETCH_FAILURE);
+      }
+
+      // Calculate the end time based on service duration
+      const startTime = selectedSlot.Start;
+      const endTime = addMinutes(startTime, service.Duration);
+
+      // Check for time conflicts with existing reservations
+      const hasTimeConflict = bookedSlots.some(booking => {
+        const existingBookingStart = new Date(booking.StartTime);
+        const existingBookingEnd = new Date(booking.EndTime);
+        return (endTime > existingBookingStart && endTime < existingBookingEnd);
+      });
+      if (hasTimeConflict) {
+        throw new Error(ErrorMessages.RESERVATION.TIME_CONFLICT);
+      }
+
+      // Check if the service would end after closing time (19:00)
+      const closingTime = new Date(startTime);
+      closingTime.setHours(CLOSING_TIME, 0, 0, 0);
+      if (endTime > closingTime) {
+        throw new Error(ErrorMessages.RESERVATION.AFTER_CLOSING_TIME);
+      }
+
       const queryResult = await supabase.from('Reservations')
-                                        .insert([{UserId: userId, BarberId: barberId, ServiceId: formData.ServiceId, 
-                                                  Status: false, StartTime: selectedSlot.Start.toISOString(), 
-                                                  EndTime: selectedSlot.End.toISOString()}]);
+                                        .insert([{
+                                          UserId: userId, 
+                                          BarberId: barberId, 
+                                          ServiceId: formData.ServiceId, 
+                                          Status: false, 
+                                          StartTime: startTime.toISOString(), 
+                                          EndTime: endTime.toISOString()
+                                        }]);
                               
       if (queryResult.error) throw queryResult.error;
       
       if (PAID_FEATURES.SEND_SMS) {
-        const formattedStringDate = selectedSlot.Start.toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric',
-                                                                                 hour: '2-digit', minute: '2-digit' })
+        const formattedStringDate = startTime.toLocaleString('pt-PT', { 
+          day: '2-digit', 
+          month: '2-digit', 
+          year: 'numeric',
+          hour: '2-digit', 
+          minute: '2-digit' 
+        });
         await sendConfirmationSMS(formData.Phone, formData.Name, formattedStringDate);
       }
 

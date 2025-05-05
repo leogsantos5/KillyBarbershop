@@ -9,37 +9,43 @@ interface TimeSelectionStepProps {
 }
 
 export function TimeSelectionStep({ slots, selectedDate, onSelectSlot, onBack }: TimeSelectionStepProps) {
+  const availableSlots = slots.filter(slot => 
+    slot.Start.getDate() === selectedDate.getDate() &&
+    slot.Start.getMonth() === selectedDate.getMonth() &&
+    slot.Start.getFullYear() === selectedDate.getFullYear() &&
+    slot.Status === undefined
+  );
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
-      <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Escolha a hora</h2>
-      <div className="grid grid-cols-2 gap-2">
-        {slots
-          .filter(event => 
-            event.Start.toDateString() === selectedDate.toDateString()
-          )
-          .map((slot, i) => (
-            <button
-              key={i}
-              onClick={() => onSelectSlot(slot)}
-              disabled={slot.Status !== undefined}
-              className={`
-                p-3 text-center border rounded-lg transition-colors
-                ${slot.Status === undefined
-                  ? 'bg-green-100 dark:bg-green-800 hover:bg-green-200 dark:hover:bg-green-700 text-green-800 dark:text-green-100 border-green-200 dark:border-green-600' 
-                  : 'bg-red-100 dark:bg-red-800 text-red-800 dark:text-red-100 border-red-200 dark:border-red-600 cursor-not-allowed'
-                }
-              `}
-            >
-              {format(slot.Start, 'HH:mm')}
-            </button>
-          ))}
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Selecione o Horário</h3>
+        <button
+          onClick={onBack}
+          className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+        >
+          Voltar
+        </button>
       </div>
-      <button
-        onClick={onBack}
-        className="mt-4 w-full p-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white"
-      >
-        ← Voltar
-      </button>
+
+      <div className="grid grid-cols-3 gap-2">
+        {availableSlots.map((slot) => (
+          <button
+            key={slot.Start.getTime()}
+            onClick={() => onSelectSlot(slot)}
+            className="p-2 text-sm bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100 
+                     rounded-md hover:bg-green-200 dark:hover:bg-green-800 transition-colors"
+          >
+            {format(slot.Start, 'HH:mm')}
+          </button>
+        ))}
+      </div>
+
+      {availableSlots.length === 0 && (
+        <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+          Não há horários disponíveis para esta data
+        </div>
+      )}
     </div>
   );
 }

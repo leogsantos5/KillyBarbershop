@@ -11,6 +11,8 @@ export const ErrorMessages = {
       DELETE_SUCCESS: 'Reserva eliminada com sucesso!',
       CONFIRM_SUCCESS: 'Reserva confirmada com sucesso!',
       CONFIRM_BARBER_SUCCESS: 'Marcação confirmada com sucesso!',
+      AFTER_CLOSING_TIME: "Não é possível agendar serviços que terminem após o horário de fecho (19:00).",
+      TIME_CONFLICT: "O horário selecionado conflita com uma reserva existente.",
     },
     BARBER: {
       CREATE_FAILURE: 'Não foi possível adicionar o barbeiro.',

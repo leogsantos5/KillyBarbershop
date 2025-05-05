@@ -35,7 +35,12 @@ export function DateSelectionStep({ slots, onSelectDate, onBack, onNext }: DateS
                 className="w-full p-4 text-left border dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 <div className="font-medium text-gray-900 dark:text-white">{format(date, 'EEEE')}</div>
-                <div className="text-gray-600 dark:text-gray-300">{format(date, 'd MMMM')}</div>
+                <div className="text-gray-600 dark:text-gray-300">
+                  {(() => {
+                    const monthName = format(date, 'MMMM');
+                    return `${format(date, 'd')} ${monthName.charAt(0).toUpperCase() + monthName.slice(1)}`;
+                  })()}
+                </div>
                 <div className="text-sm text-gray-500 dark:text-gray-400">
                   {daySlots.filter(e => e.Status === undefined).length} horários disponíveis
                 </div>

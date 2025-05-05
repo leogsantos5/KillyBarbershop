@@ -14,7 +14,6 @@ export async function sendConfirmationSMS(phone: string, name: string, date: str
 
     return true;
   } catch (error: unknown) {
-    console.error('Error sending SMS:', error instanceof Error ? error.message : 'Unknown error');
     throw error instanceof Error ? error : new Error('Failed to send SMS');
   }
 } 

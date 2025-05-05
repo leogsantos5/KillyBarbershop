@@ -28,13 +28,23 @@ export default function StatisticsGraph({ reservations, timePeriod, drillDown, o
   const options = {
     responsive: true,
     plugins: { 
-      title: { display: false }
-    },
-    tooltip: { 
-      callbacks: { 
-        label: function(this: TooltipModel<'bar'>, tooltipItem: TooltipItem<'bar'>) {
-          const value = tooltipItem.raw as number;
-          return type === 'revenue' ? `${value}€` : `${value} marcações`;
+      title: { display: false },
+      tooltip: { 
+        callbacks: { 
+          title: function(this: TooltipModel<'bar'>, tooltipItems: TooltipItem<'bar'>[]) {
+            if (timePeriod === 'monthly') {
+              return `Semana ${tooltipItems[0].dataIndex + 1}`;
+            }
+            return '';
+          },
+          label: function(this: TooltipModel<'bar'>, tooltipItem: TooltipItem<'bar'>) {
+            const value = tooltipItem.raw as number;
+            const label = tooltipItem.label;
+            return [
+              label,
+              type === 'revenue' ? `${value}€` : `${value} ${value === 1 ? 'marcação' : 'marcações'}`
+            ];
+          }
         }
       }
     },
@@ -69,47 +79,59 @@ export default function StatisticsGraph({ reservations, timePeriod, drillDown, o
       backgroundColor: 'rgb(59, 130, 246)',
       borderColor: 'rgb(29, 78, 216)',
       borderWidth: 1,
-      barThickness: 50
+      barThickness: 'flex' as const,
+      maxBarThickness: 40,
+      minBarLength: 2
     }]
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-      <div className="flex justify-between items-center mb-4">
-        <div className="relative">
-          <select
-            value={timePeriod} 
-            onChange={(e) => { setTimePeriod(e.target.value as TimePeriod); setDrillDown({}); }}
-            className="appearance-none bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg px-6 py-3 pr-12 text-lg font-medium 
-                      focus:outline-none focus:border-blue-500 cursor-pointer shadow-sm hover:border-blue-400 transition-colors
-                      text-gray-900 dark:text-white">
-            <option value="weekly">Semanalmente</option>
-            <option value="monthly">Mensalmente</option>
-            <option value="yearly">Anualmente</option>
-          </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-700 dark:text-gray-300">
-            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-            </svg>
+    <div className="bg-white dark:bg-gray-800 p-4 lg:p-6 rounded-lg shadow">
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col lg:flex-row lg:justify-between gap-4">
+          <div className="relative w-full lg:w-auto">
+            <select
+              value={timePeriod} 
+              onChange={(e) => { setTimePeriod(e.target.value as TimePeriod); setDrillDown({}); }}
+              className="w-full lg:w-auto appearance-none bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 lg:px-6 lg:py-3 pr-10 text-base lg:text-lg font-medium 
+                        focus:outline-none focus:border-blue-500 cursor-pointer shadow-sm hover:border-blue-400 transition-colors
+                        text-gray-900 dark:text-white truncate">
+              <option value="weekly">Semanalmente</option>
+              <option value="monthly">Mensalmente</option>
+              <option value="yearly">Anualmente</option>
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700 dark:text-gray-300">
+              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+              </svg>
+            </div>
           </div>
+          
+          {isOwner && (
+            <div className="relative w-full lg:w-auto">
+              <select
+                value={selectedBarberId} 
+                onChange={(e) => onBarberSelect(e.target.value)}
+                className="w-full lg:w-auto appearance-none bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 lg:px-6 lg:py-3 pr-10 text-base lg:text-lg font-medium 
+                          focus:outline-none focus:border-blue-500 cursor-pointer shadow-sm hover:border-blue-400 transition-colors
+                          text-gray-900 dark:text-white truncate">
+                <option value="">Todos os Barbeiros</option>
+                {barbers.map(barber => (
+                  <option key={barber.Id} value={barber.Id}>{barber.Name}</option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-700 dark:text-gray-300">
+                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                  <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                </svg>
+              </div>
+            </div>
+          )}
         </div>
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+
+        <h2 className="text-lg lg:text-xl font-semibold text-gray-900 dark:text-white text-center lg:text-left mt-6">
           {type === 'revenue' ? 'Faturação €' : 'Número de Marcações'}
         </h2>
-        
-        {isOwner && (
-          <select
-            value={selectedBarberId} 
-            onChange={(e) => onBarberSelect(e.target.value)}
-            className="appearance-none bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-lg px-6 py-3 pr-12 text-lg font-medium 
-                      focus:outline-none focus:border-blue-500 cursor-pointer shadow-sm hover:border-blue-400 transition-colors
-                      text-gray-900 dark:text-white">
-            <option value="">Todos os Barbeiros</option>
-            {barbers.map(barber => (
-              <option key={barber.Id} value={barber.Id}>{barber.Name}</option>
-            ))}
-          </select>
-        )}
       </div>
       <Bar options={options} data={chartData} />
     </div>
